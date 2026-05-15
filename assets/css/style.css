@@ -248,7 +248,7 @@ textarea:focus-visible {
   position: absolute;
   inset: 0;
   background: radial-gradient(900px 600px at 20% 10%, rgba(255, 255, 255, 0.06), transparent 60%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(15, 17, 20, 0.62));
+    linear-gradient(180deg, rgba(0, 0, 0, 0.5), rgba(15, 17, 20, 0.84));
   z-index: 1;
 }
 .hero-overlay {
@@ -845,6 +845,10 @@ textarea:focus-visible {
 @media (max-width: 720px) {
   :root {
     --header-h: 68px;
+  }
+  .hero-subtitle {
+    font-size: clamp(0.96rem, 3.8vw, 1.05rem);
+    max-width: 40ch;
   }
   .nav-toggle {
     display: inline-flex;
