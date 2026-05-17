@@ -501,9 +501,6 @@
           </div>
           
           <div style="display: flex; align-items: center; gap: 1.5rem;">
-            <button id="disconnectDbBtn" class="back-link" style="display: none; color: #ff6b6b; font-weight: 500;">
-              <span>🔌 Disconnect DB</span>
-            </button>
             <a href="/" class="back-link">
               <span>← Back to main site</span>
             </a>
@@ -575,6 +572,41 @@
                   </button>
                 </div>
               </form>
+            </section>
+
+            <!-- Dashboard Settings Panel -->
+            <section class="panel-card" style="margin-top: 1.5rem; padding: 1.25rem 2rem;">
+              <style>
+                @keyframes settingsPulse {
+                  0% { transform: scale(0.95); opacity: 0.8; }
+                  50% { transform: scale(1.15); opacity: 1; }
+                  100% { transform: scale(0.95); opacity: 0.8; }
+                }
+                #disconnectDbBtn:hover {
+                  background: rgba(255, 82, 82, 0.12) !important;
+                  border-color: rgba(255, 82, 82, 0.3) !important;
+                  box-shadow: 0 4px 15px rgba(255, 82, 82, 0.1);
+                }
+              </style>
+              <h2 style="font-size: 1.05rem; margin-bottom: 0.8rem; padding-bottom: 0.4rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary-bronze); display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.04);">
+                <span style="font-size: 1.15rem;">⚙️</span> Settings
+              </h2>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem;">
+                  <span style="color: var(--muted-2);">Database Connection:</span>
+                  <span style="display: flex; align-items: center; gap: 0.4rem; color: #4caf50; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <span style="width: 7px; height: 7px; background: #4caf50; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #4caf50; animation: settingsPulse 2s infinite;"></span>
+                    Active
+                  </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem;">
+                  <span style="color: var(--muted-2);">Project URL:</span>
+                  <span id="settingsDbUrl" style="color: var(--muted); font-family: monospace; font-size: 0.8rem;">Connecting...</span>
+                </div>
+                <button type="button" id="disconnectDbBtn" class="delete-btn" style="background: rgba(255, 82, 82, 0.05); border: 1px solid rgba(255, 82, 82, 0.12); color: var(--danger-red); margin-top: 0.4rem; padding: 0.65rem 1rem; font-size: 0.82rem; border-radius: 999px; font-weight: 600; flex-grow: 1; transition: all 0.2s ease;">
+                  <span>🔌 Disconnect Database</span>
+                </button>
+              </div>
             </section>
 
             <!-- Right: Active Projects Manager -->

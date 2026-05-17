@@ -428,13 +428,11 @@ window.deleteWork = async (id) => {
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Resolve credentials
   const creds = window.getSupabaseCredentials ? window.getSupabaseCredentials() : { isConfigured: false };
-  const disconnectBtn = $("#disconnectDbBtn");
 
   if (!creds.isConfigured) {
     // Show Connect Setup View, hide main dashboard
     $("#supabaseSetupView").style.display = "block";
     $("#mainDashboardView").style.display = "none";
-    if (disconnectBtn) disconnectBtn.style.display = "none";
     
     // Bind Setup submit listener
     setupDatabaseConfig();
@@ -442,12 +440,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // Show Main Dashboard, hide Setup View
     $("#supabaseSetupView").style.display = "none";
     $("#mainDashboardView").style.display = "block";
-    
-    // Enable Disconnect Toggle in Header
+
+    // Populate settings connection details dynamically
+    const settingsDbUrl = $("#settingsDbUrl");
+    if (settingsDbUrl && creds.url) {
+      try {
+        const urlObj = new URL(creds.url);
+        const sub = urlObj.hostname.split(".")[0];
+        const cleanSub = sub.length > 8 ? sub.substring(0, 6) + "..." : sub;
+        settingsDbUrl.textContent = `https://${cleanSub}.supabase.co`;
+      } catch (e) {
+        settingsDbUrl.textContent = creds.url;
+      }
+    }
+
+    // Connect disconnect toggle in Settings panel
+    const disconnectBtn = $("#disconnectDbBtn");
     if (disconnectBtn) {
-      disconnectBtn.style.display = "block";
       disconnectBtn.addEventListener("click", () => {
-        if (confirm("Disconnect from the Supabase database? You can reconnect at any time.")) {
+        if (confirm("Disconnect from the Supabase database? You can reconnect at any time by pasting your credentials again.")) {
           localStorage.removeItem("neralu_supabase_url");
           localStorage.removeItem("neralu_supabase_key");
           window.location.reload();
