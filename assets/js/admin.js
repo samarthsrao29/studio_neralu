@@ -105,7 +105,7 @@ const setupImagePreview = () => {
 
 // Start editing an existing work
 window.startEditWork = (id) => {
-  const work = activeWorks.find((w) => w.id === id);
+  const work = activeWorks.find((w) => String(w.id) === String(id));
   if (!work) return;
 
   editingWorkId = id;
@@ -311,7 +311,7 @@ const setupFormSubmit = () => {
 
         // Clean up: If in EDIT mode and new image uploaded, delete the old file from bucket
         if (editingWorkId) {
-          const oldWork = activeWorks.find(w => w.id === editingWorkId);
+          const oldWork = activeWorks.find(w => String(w.id) === String(editingWorkId));
           if (oldWork && oldWork.image.includes("/storage/v1/object/public/portfolio/")) {
             const oldFileName = oldWork.image.split("/").pop();
             await supabaseClient.storage.from("portfolio").remove([oldFileName]);
@@ -379,12 +379,12 @@ window.deleteWork = async (id) => {
   if (!supabaseClient) return;
 
   // If deleting the project currently being edited, cancel edit mode first
-  if (editingWorkId === id) {
+  if (String(editingWorkId) === String(id)) {
     cancelEditing();
   }
 
   const cardElement = $(`#work-card-${id}`);
-  const work = activeWorks.find(w => w.id === id);
+  const work = activeWorks.find(w => String(w.id) === String(id));
 
   try {
     // 1. Delete from PostgreSQL works table
