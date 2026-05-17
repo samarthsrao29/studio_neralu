@@ -454,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Connect disconnect toggle in Settings panel
+    // Connect disconnect toggle inside Modal
     const disconnectBtn = $("#disconnectDbBtn");
     if (disconnectBtn) {
       disconnectBtn.addEventListener("click", () => {
@@ -462,6 +462,31 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.removeItem("neralu_supabase_url");
           localStorage.removeItem("neralu_supabase_key");
           window.location.reload();
+        }
+      });
+    }
+
+    // Settings Modal Triggers
+    const openSettingsBtn = $("#openSettingsBtn");
+    if (openSettingsBtn) {
+      openSettingsBtn.style.display = "flex";
+      openSettingsBtn.addEventListener("click", () => {
+        $("#settingsModal").style.display = "flex";
+      });
+    }
+
+    const closeSettingsBtn = $("#closeSettingsBtn");
+    if (closeSettingsBtn) {
+      closeSettingsBtn.addEventListener("click", () => {
+        $("#settingsModal").style.display = "none";
+      });
+    }
+
+    const settingsModal = $("#settingsModal");
+    if (settingsModal) {
+      settingsModal.addEventListener("click", (e) => {
+        if (e.target === settingsModal) {
+          settingsModal.style.display = "none";
         }
       });
     }
