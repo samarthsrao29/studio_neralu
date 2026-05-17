@@ -64,7 +64,11 @@ const initReveal = () => {
     { threshold: 0.12, rootMargin: "0px 0px -5% 0px" }
   );
 
-  items.forEach((el) => observer.observe(el));
+  items.forEach((el) => {
+    if (!el.classList.contains("is-in")) {
+      observer.observe(el);
+    }
+  });
 };
 
 const initMailtoForm = () => {
@@ -94,9 +98,119 @@ const initMailtoForm = () => {
   });
 };
 
+// Resilient Offline/Placeholder Works in Case of Setup/Network Lag
+const DEFAULT_WORKS = [
+  {
+    id: "1",
+    title: "Parashurama Theme Park",
+    description: "Karkala — a panoramic setting with a strong cultural centerpiece.",
+    category: "Public",
+    location: "Karkala",
+    image: "assets/img/work-parashurama.jpg"
+  },
+  {
+    id: "2",
+    title: "Bhagavathi Mane / Devi Nilaya",
+    description: "A home shaped by deep shade, layered roofs, and a calm courtyard rhythm.",
+    category: "Residence",
+    location: "India",
+    image: "assets/img/work-bhagavathi.jpg"
+  },
+  {
+    id: "3",
+    title: "Bhagavathi Mane / Devi Nilaya",
+    description: "Traditional lines with a contemporary calm—crafted for everyday shade.",
+    category: "Residence",
+    location: "India",
+    image: "assets/img/work-bhagavathi-2.jpg"
+  },
+  {
+    id: "4",
+    title: "Kadu Mane / Kutira",
+    description: "A humble home set within lush greens—quiet, grounded, and warm.",
+    category: "Residence",
+    location: "Kapoli",
+    image: "assets/img/work-kadu.jpg"
+  }
+];
+
+// Helper to inject HTML cards into grid
+const renderWorks = (works, container) => {
+  if (!works || works.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 3rem 1rem;">
+        <p>No projects uploaded yet. Visit the admin dashboard to add works.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = works
+    .map(
+      (work) => `
+    <article class="card reveal">
+      <div class="card-media" style="background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.28)), url('${work.image}') center/cover no-repeat;" role="img" aria-label="${work.title} — ${work.description}"></div>
+      <div class="card-body">
+        <h3>${work.title}</h3>
+        <p>${work.description}</p>
+        <div class="card-meta">
+          <span>${work.category}</span>
+          <span>•</span>
+          <span>${work.location}</span>
+        </div>
+      </div>
+    </article>
+  `
+    )
+    .join("");
+
+  // Trigger scroll reveals for dynamic elements
+  initReveal();
+};
+
+const initDynamicWorks = async () => {
+  const container = $("#works-container");
+  if (!container) return;
+
+  // 1. Resolve Supabase config dynamically
+  const creds = window.getSupabaseCredentials ? window.getSupabaseCredentials() : { isConfigured: false };
+
+  if (!creds.isConfigured) {
+    console.log("Supabase is not configured yet. Rendering offline defaults.");
+    renderWorks(DEFAULT_WORKS, container);
+    return;
+  }
+
+  try {
+    // 2. Initialize Supabase Client
+    const supabaseClient = supabase.createClient(creds.url, creds.anonKey);
+    
+    // 3. Fetch from Postgres works table
+    const { data: works, error } = await supabaseClient
+      .from("works")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    // If table is newly created but empty, render default works so the site remains beautiful!
+    if (!works || works.length === 0) {
+      console.log("Supabase database empty. Rendering offline defaults.");
+      renderWorks(DEFAULT_WORKS, container);
+      return;
+    }
+
+    renderWorks(works, container);
+  } catch (err) {
+    console.error("Supabase load error. Falling back to local default works:", err);
+    // Keep user site 100% active even in case of database or connection limits
+    renderWorks(DEFAULT_WORKS, container);
+  }
+};
+
+// Initializers
 setYear();
 initStickyHeader();
 initMobileNav();
 initReveal();
+initDynamicWorks();
 initMailtoForm();
-

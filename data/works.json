@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "title": "Parashurama Theme Park",
+    "description": "Karkala — a panoramic setting with a strong cultural centerpiece.",
+    "category": "Public",
+    "location": "udupi",
+    "image": "assets/img/work-parashurama.jpg"
+  },
+  {
+    "id": "2",
+    "title": "Bhagavathi Mane / Devi Nilaya",
+    "description": "A home shaped by deep shade, layered roofs, and a calm courtyard rhythm.",
+    "category": "Residence",
+    "location": "India",
+    "image": "assets/img/work-bhagavathi.jpg"
+  },
+  {
+    "id": "3",
+    "title": "Bhagavathi Mane / Devi Nilaya",
+    "description": "Traditional lines with a contemporary calm—crafted for everyday shade.",
+    "category": "Residence",
+    "location": "India",
+    "image": "assets/img/work-bhagavathi-2.jpg"
+  },
+  {
+    "id": "4",
+    "title": "Kadu Mane / Kutira Retreat",
+    "description": "A humble home set within lush greens—quiet, grounded, warm, and newly optimized for peaceful living.",
+    "category": "Residence",
+    "location": "Kapoli Forest",
+    "image": "assets/img/work-kadu.jpg"
+  }
+]

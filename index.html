@@ -94,58 +94,17 @@
             </p>
           </header>
 
-          <div class="cards">
-            <article class="card reveal">
-              <div class="card-media media-1" role="img" aria-label="Parashurama Theme Park, Karkala — aerial view"></div>
-              <div class="card-body">
-                <h3>Parashurama Theme Park</h3>
-                <p>Karkala — a panoramic setting with a strong cultural centerpiece.</p>
-                <div class="card-meta">
-                  <span>Public</span>
-                  <span>•</span>
-                  <span>Karkala</span>
-                </div>
-              </div>
-            </article>
-
-            <article class="card reveal">
-              <div class="card-media media-2" role="img" aria-label="Atelier Loft — clean lines and textured concrete"></div>
-              <div class="card-body">
-                <h3>Bhagavathi Mane / Devi Nilaya</h3>
-                <p>A home shaped by deep shade, layered roofs, and a calm courtyard rhythm.</p>
-                <div class="card-meta">
-                  <span>Residence</span>
-                  <span>•</span>
-                  <span>India</span>
-                </div>
-              </div>
-            </article>
-
-            <article class="card reveal">
-              <div class="card-media media-3" role="img" aria-label="Neralu Café — sunlit seating and natural stone"></div>
-              <div class="card-body">
-                <h3>Bhagavathi Mane / Devi Nilaya</h3>
-                <p>Traditional lines with a contemporary calm—crafted for everyday shade.</p>
-                <div class="card-meta">
-                  <span>Residence</span>
-                  <span>•</span>
-                  <span>India</span>
-                </div>
-              </div>
-            </article>
-
-            <article class="card reveal">
-              <div class="card-media media-4" role="img" aria-label="Kadu Mane / Kutira — forest home"></div>
-              <div class="card-body">
-                <h3>Kadu Mane / Kutira</h3>
-                <p>A humble home set within lush greens—quiet, grounded, and warm.</p>
-                <div class="card-meta">
-                  <span>Residence</span>
-                  <span>•</span>
-                  <span>Kapoli</span>
-                </div>
-              </div>
-            </article>
+          <div id="works-container" class="cards">
+            <!-- Dynamic portfolio works are rendered here via assets/js/main.js -->
+            <div class="loading-spinner" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+              <span class="spinner-circle" style="width: 28px; height: 28px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></span>
+              <span>Loading Selected Projects...</span>
+            </div>
+            <style>
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            </style>
           </div>
 
           <div class="callout reveal">
@@ -395,6 +354,8 @@
       </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
     <script src="assets/js/main.js"></script>
   </body>
 </html>
