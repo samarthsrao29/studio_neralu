@@ -433,6 +433,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Show Connect Setup View, hide main dashboard
     $("#supabaseSetupView").style.display = "block";
     $("#mainDashboardView").style.display = "none";
+    const openSettingsBtn = $("#openSettingsBtn");
+    if (openSettingsBtn) openSettingsBtn.style.display = "none";
     
     // Bind Setup submit listener
     setupDatabaseConfig();
