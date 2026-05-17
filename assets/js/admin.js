@@ -336,7 +336,7 @@ const setupFormSubmit = () => {
         const { error: dbError } = await supabaseClient
           .from("works")
           .update(updatePayload)
-          .eq("id", editingWorkId);
+          .eq("id", Number(editingWorkId));
 
         if (dbError) throw dbError;
         showToast("Project updated successfully!");
@@ -391,7 +391,7 @@ window.deleteWork = async (id) => {
     const { error: dbError } = await supabaseClient
       .from("works")
       .delete()
-      .eq("id", id);
+      .eq("id", Number(id));
 
     if (dbError) throw dbError;
 
