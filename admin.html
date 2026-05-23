@@ -1,740 +1,793 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Studio Neralu — Admin Portal</title>
-    <link rel="icon" href="assets/img/favicon.png" type="image/png" />
-    <link rel="stylesheet" href="assets/css/style.css" />
+
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-44VTVQC4YN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-44VTVQC4YN');
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Studio Neralu — Admin Portal</title>
+  <link rel="icon" href="assets/img/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    :root {
+      --primary-bronze: #d2a679;
+      --primary-bronze-hover: #e0be9b;
+      --danger-red: #ff5252;
+      --danger-red-hover: #ff7373;
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-hover: rgba(255, 255, 255, 0.06);
+    }
+
+    body {
+      background: #060709;
+      padding-top: 0;
+    }
+
+    body::before {
+      background: radial-gradient(1000px 650px at 85% 5%, rgba(210, 166, 121, 0.15), transparent 60%),
+        radial-gradient(900px 650px at 15% 90%, rgba(210, 166, 121, 0.08), transparent 55%),
+        linear-gradient(180deg, #060709, #0f1114);
+    }
+
+    .admin-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-header {
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1.2rem 0;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-title-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .admin-badge {
+      background: rgba(210, 166, 121, 0.15);
+      color: var(--primary-bronze);
+      border: 1px solid rgba(210, 166, 121, 0.3);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 650;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .back-link {
+      color: var(--muted);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s ease;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .back-link:hover {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .admin-main {
+      flex: 1;
+      padding: 3rem 0;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1.9fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 2.2rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .panel-card:hover {
+      border-color: rgba(210, 166, 121, 0.2);
+    }
+
+    .panel-card h2 {
+      margin: 0 0 1.5rem;
+      font-family: var(--font-sans);
+      font-size: 1.45rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Custom File Upload Dropzone */
+    .dropzone-area {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 2rem;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+    }
+
+    .dropzone-area:hover,
+    .dropzone-area.dragover {
+      border-color: var(--primary-bronze);
+      background: rgba(210, 166, 121, 0.04);
+    }
+
+    .dropzone-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.8rem;
+      color: var(--muted-2);
+      transition: color 0.2s ease;
+    }
+
+    .dropzone-area:hover .dropzone-icon {
+      color: var(--primary-bronze);
+    }
+
+    .dropzone-text {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .dropzone-text span {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .dropzone-file-input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* Image Preview inside Dropzone */
+    .preview-container {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      z-index: 10;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+    }
+
+    .remove-preview-btn {
+      position: absolute;
+      top: 0.8rem;
+      right: 0.8rem;
+      z-index: 20;
+      background: rgba(0, 0, 0, 0.75);
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: bold;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .remove-preview-btn:hover {
+      background: var(--danger-red);
+      border-color: var(--danger-red);
+    }
+
+    /* Admin Forms */
+    .admin-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .admin-form label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .admin-form label span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 550;
+    }
+
+    .admin-form input,
+    .admin-form textarea,
+    .admin-form select {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .admin-form input:focus,
+    .admin-form textarea:focus,
+    .admin-form select:focus {
+      border-color: var(--primary-bronze);
+      box-shadow: 0 0 0 4px rgba(210, 166, 121, 0.12);
+    }
+
+    .admin-form textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Action Buttons */
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(180deg, #e5b88a, #c09160);
+      border: 1px solid rgba(210, 166, 121, 0.5);
+      color: #0d0f12;
+      padding: 1rem;
+      border-radius: 999px;
+      font-weight: 650;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      font-size: 1rem;
+      box-shadow: 0 15px 30px rgba(210, 166, 121, 0.15);
+      transition: all 0.25s ease;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(180deg, #ecc59c, #d2a679);
+      box-shadow: 0 15px 35px rgba(210, 166, 121, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Button Ghost Variant */
+    .button-ghost {
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      box-shadow: none;
+    }
+
+    .button-ghost:hover {
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: none;
+      color: var(--text);
+    }
+
+    /* Admin portfolio list */
+    .works-list-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 640px) {
+      .works-list-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .admin-card {
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .admin-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .admin-card-media {
+      aspect-ratio: 16 / 10;
+      width: 100%;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .admin-card-body {
+      padding: 1.2rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-card h3 {
+      margin: 0 0 0.4rem;
+      font-family: var(--font-sans);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .admin-card p {
+      margin: 0 0 0.8rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+      flex-grow: 1;
+    }
+
+    .admin-card-meta {
+      display: flex;
+      gap: 0.5rem;
+      color: var(--muted-2);
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+    }
+
+    .delete-btn {
+      background: rgba(255, 82, 82, 0.08);
+      border: 1px solid rgba(255, 82, 82, 0.2);
+      color: var(--danger-red);
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .delete-btn:hover {
+      background: var(--danger-red);
+      color: #fff;
+      border-color: var(--danger-red);
+      box-shadow: 0 10px 25px rgba(255, 82, 82, 0.2);
+    }
+
+    .delete-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Toasts / Notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .toast {
+      background: rgba(10, 11, 15, 0.9);
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      padding: 1rem 1.4rem;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      min-width: 280px;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: toast-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--primary-bronze);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--danger-red);
+    }
+
+    @keyframes toast-in {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Loading spinners */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    .btn-spinner {
+      color: #0d0f12;
+    }
+
+    /* Fade Out for items being deleted */
+    .card-deleting {
+      opacity: 0 !important;
+      transform: scale(0.9) translateY(10px) !important;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="admin-layout">
+    <!-- Admin Header -->
+    <header class="admin-header">
+      <div class="container header-container">
+        <div class="admin-title-group">
+          <a class="brand" href="/" aria-label="Studio Neralu home">
+            <img class="brand-logo" src="assets/img/logo.jpg" alt="Studio Neralu logo" />
+            <span class="brand-text">
+              <span class="brand-name">Studio Neralu</span>
+              <span class="brand-tag">Architecture • Interiors</span>
+            </span>
+          </a>
+          <span class="admin-badge">Admin Dashboard</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+          <button id="openSettingsBtn" class="back-link"
+            onclick="const modal = document.getElementById('settingsModal'); if (modal) modal.style.display = 'flex';"
+            style="display: flex; background: none; border: none; cursor: pointer; color: var(--muted); font-weight: 500; font-family: inherit; font-size: 0.95rem; align-items: center; gap: 0.35rem; padding: 0; outline: none; transition: color 0.2s ease;">
+            <span>⚙️ Settings</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Content -->
+    <main class="admin-main">
+
+      <!-- MAIN DASHBOARD VIEW (Shown when Supabase is connected) -->
+      <div id="mainDashboardView" class="container" style="display: none;">
+        <div class="admin-grid">
+
+          <!-- Left: Upload Form -->
+          <section class="panel-card">
+            <h2 id="formSectionTitle">Upload New Project</h2>
+            <form id="uploadForm" class="admin-form" autocomplete="off">
+
+              <!-- File Dropzone -->
+              <div class="dropzone-area" id="dropzone">
+                <div class="dropzone-icon">✦</div>
+                <div class="dropzone-text">
+                  <span>Click to upload image</span> or drag & drop<br />
+                  <small style="color: var(--muted-2); font-size: 0.78rem; display: block; margin-top: 0.3rem;">PNG,
+                    JPG, JPEG, WEBP (Max 10MB)</small>
+                </div>
+                <input type="file" id="imageInput" name="image" class="dropzone-file-input" accept="image/*" />
+
+                <!-- File Preview Overlay -->
+                <div class="preview-container" id="previewContainer">
+                  <button type="button" class="remove-preview-btn" id="removePreviewBtn"
+                    aria-label="Remove image">×</button>
+                  <img id="previewImage" class="preview-image" src="" alt="Selected project thumbnail" />
+                </div>
+              </div>
+
+              <label>
+                <span>Project Title</span>
+                <input type="text" id="titleInput" name="title" placeholder="e.g. Parashurama Theme Park" required />
+              </label>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                <label>
+                  <span>Category</span>
+                  <select id="categoryInput" name="category">
+                    <option value="Residence">Residence</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="Public">Public</option>
+                    <option value="Styling">Styling</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Location</span>
+                  <input type="text" id="locationInput" name="location" placeholder="e.g. India" required />
+                </label>
+              </div>
+
+              <label>
+                <span>Description</span>
+                <textarea id="descriptionInput" name="description"
+                  placeholder="Describe the architectural concept, material palette, daylight elements..."
+                  required></textarea>
+              </label>
+
+              <div style="display: flex; flex-direction: column; gap: 0.6rem; width: 100%;">
+                <button type="submit" class="submit-btn" id="submitBtn">
+                  <span>Upload & Publish Project</span>
+                </button>
+                <button type="button" class="submit-btn button-ghost" id="cancelEditBtn" style="display: none;">
+                  <span>Cancel Editing</span>
+                </button>
+              </div>
+            </form>
+          </section>
+
+
+
+          <!-- Right: Active Projects Manager -->
+          <section class="panel-card" style="min-height: 500px;">
+            <h2>Manage Portfolio Works</h2>
+            <div id="worksListContainer" class="works-list-grid">
+              <!-- Works will be rendered here dynamically via assets/js/admin.js -->
+              <div style="grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 4rem 1rem;">
+                <span class="spinner"
+                  style="border-top-color: var(--primary-bronze); width: 24px; height: 24px; margin-bottom: 0.8rem;"></span>
+                <p>Loading projects list...</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- SUPABASE SETUP VIEW (Shown when Supabase is NOT connected) -->
+      <div id="supabaseSetupView" class="container" style="display: none; max-width: 540px; margin: 2rem auto;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <img src="assets/img/logo.jpg" alt="Studio Neralu"
+            style="width: 70px; height: 70px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);" />
+        </div>
+        <section class="panel-card"
+          style="box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6); border-color: rgba(210, 166, 121, 0.25);">
+          <h2 style="border-bottom: 1px solid var(--glass-border); padding-bottom: 0.75rem;">🔌 Connect Supabase</h2>
+          <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">
+            Your portfolio is ready to run serverless on GitHub Pages! Enter your Supabase Project API credentials
+            below. You can copy these from your <strong>Supabase Dashboard → Project Settings → API</strong>.
+          </p>
+          <form id="setupForm" class="admin-form" autocomplete="off">
+            <label>
+              <span>Supabase Project URL</span>
+              <input type="url" id="setupUrlInput" placeholder="https://your-project-id.supabase.co" required />
+            </label>
+            <label>
+              <span>Supabase Anon Public API Key</span>
+              <input type="password" id="setupKeyInput" placeholder="eyJhbGciOiJIUzI1Ni..." required />
+            </label>
+            <button type="submit" class="submit-btn" style="margin-top: 0.5rem;">
+              <span>Connect & Initialize Database</span>
+            </button>
+          </form>
+        </section>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Settings Modal Popup -->
+  <div id="settingsModal" class="modal-overlay" onclick="if(event.target === this) this.style.display = 'none';"
+    style="display: none;">
     <style>
-      :root {
-        --primary-bronze: #d2a679;
-        --primary-bronze-hover: #e0be9b;
-        --danger-red: #ff5252;
-        --danger-red-hover: #ff7373;
-        --glass-bg: rgba(255, 255, 255, 0.03);
-        --glass-border: rgba(255, 255, 255, 0.08);
-        --glass-hover: rgba(255, 255, 255, 0.06);
-      }
-
-      body {
-        background: #060709;
-        padding-top: 0;
-      }
-
-      body::before {
-        background: radial-gradient(1000px 650px at 85% 5%, rgba(210, 166, 121, 0.15), transparent 60%),
-          radial-gradient(900px 650px at 15% 90%, rgba(210, 166, 121, 0.08), transparent 55%),
-          linear-gradient(180deg, #060709, #0f1114);
-      }
-
-      .admin-layout {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .admin-header {
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(20px);
-        border-bottom: 1px solid var(--glass-border);
-        position: sticky;
+      .modal-overlay {
+        position: fixed;
         top: 0;
-        z-index: 100;
-        padding: 1.2rem 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: modalFadeIn 0.2s ease-out forwards;
       }
 
-      .header-container {
+      .modal-card {
+        background: rgba(22, 22, 22, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 420px;
+        padding: 1.8rem 2.2rem;
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
+        transform: scale(0.95);
+        animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .modal-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       }
 
-      .admin-title-group {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .admin-badge {
-        background: rgba(210, 166, 121, 0.15);
-        color: var(--primary-bronze);
-        border: 1px solid rgba(210, 166, 121, 0.3);
-        padding: 0.35rem 0.75rem;
-        border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 650;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-      }
-
-      .back-link {
-        color: var(--muted);
-        font-size: 0.95rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: color 0.2s ease;
-        background: transparent;
+      .close-modal-btn {
+        background: none;
         border: none;
+        color: var(--muted);
+        font-size: 1.8rem;
         cursor: pointer;
+        transition: color 0.2s;
+        line-height: 1;
         padding: 0;
-      }
-
-      .back-link:hover {
-        color: var(--text);
-        text-decoration: none;
-      }
-
-      .admin-main {
-        flex: 1;
-        padding: 3rem 0;
-      }
-
-      .admin-grid {
-        display: grid;
-        grid-template-columns: 1.1fr 1.9fr;
-        gap: 2.5rem;
-        align-items: start;
-      }
-
-      @media (max-width: 1024px) {
-        .admin-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .panel-card {
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius);
-        padding: 2.2rem;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(10px);
-        transition: transform 0.3s ease, border-color 0.3s ease;
-      }
-
-      .panel-card:hover {
-        border-color: rgba(210, 166, 121, 0.2);
-      }
-
-      .panel-card h2 {
-        margin: 0 0 1.5rem;
-        font-family: var(--font-sans);
-        font-size: 1.45rem;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        color: var(--text);
-        border-bottom: 1px solid var(--glass-border);
-        padding-bottom: 0.75rem;
-      }
-
-      /* Custom File Upload Dropzone */
-      .dropzone-area {
-        border: 2px dashed rgba(255, 255, 255, 0.15);
-        border-radius: var(--radius-sm);
-        padding: 2rem;
-        text-align: center;
-        background: rgba(0, 0, 0, 0.15);
-        cursor: pointer;
-        transition: all 0.25s ease;
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 180px;
-      }
-
-      .dropzone-area:hover, .dropzone-area.dragover {
-        border-color: var(--primary-bronze);
-        background: rgba(210, 166, 121, 0.04);
-      }
-
-      .dropzone-icon {
-        font-size: 2.2rem;
-        margin-bottom: 0.8rem;
-        color: var(--muted-2);
-        transition: color 0.2s ease;
-      }
-
-      .dropzone-area:hover .dropzone-icon {
-        color: var(--primary-bronze);
-      }
-
-      .dropzone-text {
-        font-size: 0.95rem;
-        color: var(--muted);
-        line-height: 1.4;
-      }
-
-      .dropzone-text span {
-        color: var(--text);
-        font-weight: 600;
-      }
-
-      .dropzone-file-input {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        cursor: pointer;
-      }
-
-      /* Image Preview inside Dropzone */
-      .preview-container {
-        position: absolute;
-        inset: 0;
-        background: #000;
-        z-index: 10;
-        display: none;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .preview-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        opacity: 0.85;
-      }
-
-      .remove-preview-btn {
-        position: absolute;
-        top: 0.8rem;
-        right: 0.8rem;
-        z-index: 20;
-        background: rgba(0, 0, 0, 0.75);
-        color: var(--text);
-        border: 1px solid var(--glass-border);
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        display: grid;
-        place-items: center;
-        cursor: pointer;
-        font-size: 1.1rem;
-        font-weight: bold;
-        transition: background 0.2s, border-color 0.2s;
-      }
-
-      .remove-preview-btn:hover {
-        background: var(--danger-red);
-        border-color: var(--danger-red);
-      }
-
-      /* Admin Forms */
-      .admin-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.2rem;
-      }
-
-      .admin-form label {
-        display: flex;
-        flex-direction: column;
-        gap: 0.45rem;
-      }
-
-      .admin-form label span {
-        color: var(--muted);
-        font-size: 0.9rem;
-        font-weight: 550;
-      }
-
-      .admin-form input,
-      .admin-form textarea,
-      .admin-form select {
-        width: 100%;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: rgba(0, 0, 0, 0.25);
-        color: var(--text);
-        border-radius: var(--radius-sm);
-        padding: 0.85rem 1rem;
-        font-size: 0.95rem;
         outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
       }
 
-      .admin-form input:focus,
-      .admin-form textarea:focus,
-      .admin-form select:focus {
-        border-color: var(--primary-bronze);
-        box-shadow: 0 0 0 4px rgba(210, 166, 121, 0.12);
-      }
-
-      .admin-form textarea {
-        resize: vertical;
-        min-height: 100px;
-      }
-
-      /* Action Buttons */
-      .submit-btn {
-        width: 100%;
-        background: linear-gradient(180deg, #e5b88a, #c09160);
-        border: 1px solid rgba(210, 166, 121, 0.5);
-        color: #0d0f12;
-        padding: 1rem;
-        border-radius: 999px;
-        font-weight: 650;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.6rem;
-        font-size: 1rem;
-        box-shadow: 0 15px 30px rgba(210, 166, 121, 0.15);
-        transition: all 0.25s ease;
-      }
-
-      .submit-btn:hover {
-        background: linear-gradient(180deg, #ecc59c, #d2a679);
-        box-shadow: 0 15px 35px rgba(210, 166, 121, 0.25);
-        transform: translateY(-1px);
-      }
-
-      .submit-btn:active {
-        transform: translateY(1px);
-      }
-
-      .submit-btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-      }
-
-      /* Button Ghost Variant */
-      .button-ghost {
-        background: transparent;
-        border-color: rgba(255, 255, 255, 0.08);
-        color: var(--muted);
-        box-shadow: none;
-      }
-
-      .button-ghost:hover {
-        background: rgba(255, 255, 255, 0.04);
-        box-shadow: none;
-        color: var(--text);
-      }
-
-      /* Admin portfolio list */
-      .works-list-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1.2rem;
-      }
-
-      @media (max-width: 640px) {
-        .works-list-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .admin-card {
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-sm);
-        background: rgba(0, 0, 0, 0.2);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        position: relative;
-        transition: all 0.3s ease;
-      }
-
-      .admin-card:hover {
-        border-color: rgba(255, 255, 255, 0.15);
-        transform: translateY(-2px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-      }
-
-      .admin-card-media {
-        aspect-ratio: 16 / 10;
-        width: 100%;
-        background-position: center;
-        background-size: cover;
-        background-repeat: no-repeat;
-        border-bottom: 1px solid var(--glass-border);
-      }
-
-      .admin-card-body {
-        padding: 1.2rem;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .admin-card h3 {
-        margin: 0 0 0.4rem;
-        font-family: var(--font-sans);
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: var(--text);
-      }
-
-      .admin-card p {
-        margin: 0 0 0.8rem;
-        color: var(--muted);
-        font-size: 0.9rem;
-        line-height: 1.45;
-        flex-grow: 1;
-      }
-
-      .admin-card-meta {
-        display: flex;
-        gap: 0.5rem;
-        color: var(--muted-2);
-        font-size: 0.82rem;
-        margin-bottom: 1rem;
-      }
-
-      .delete-btn {
-        background: rgba(255, 82, 82, 0.08);
-        border: 1px solid rgba(255, 82, 82, 0.2);
+      .close-modal-btn:hover {
         color: var(--danger-red);
-        padding: 0.65rem 1rem;
-        border-radius: 999px;
-        font-size: 0.88rem;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        width: 100%;
-        transition: all 0.2s ease;
       }
 
-      .delete-btn:hover {
-        background: var(--danger-red);
-        color: #fff;
-        border-color: var(--danger-red);
-        box-shadow: 0 10px 25px rgba(255, 82, 82, 0.2);
-      }
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+        }
 
-      .delete-btn:active {
-        transform: scale(0.98);
-      }
-
-      /* Toasts / Notifications */
-      .toast-container {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
-      }
-
-      .toast {
-        background: rgba(10, 11, 15, 0.9);
-        backdrop-filter: blur(15px);
-        border: 1px solid var(--glass-border);
-        color: var(--text);
-        padding: 1rem 1.4rem;
-        border-radius: var(--radius-sm);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        min-width: 280px;
-        transform: translateY(20px);
-        opacity: 0;
-        animation: toast-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        transition: opacity 0.3s, transform 0.3s;
-      }
-
-      .toast.success {
-        border-left: 4px solid var(--primary-bronze);
-      }
-
-      .toast.error {
-        border-left: 4px solid var(--danger-red);
-      }
-
-      @keyframes toast-in {
         to {
-          transform: translateY(0);
           opacity: 1;
         }
       }
 
-      /* Loading spinners */
-      .spinner {
-        width: 18px;
-        height: 18px;
-        border: 2px solid rgba(0, 0, 0, 0.1);
-        border-top-color: currentColor;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        display: inline-block;
+      @keyframes modalScaleIn {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
       }
 
-      .btn-spinner {
-        color: #0d0f12;
+      @keyframes settingsPulse {
+        0% {
+          transform: scale(0.95);
+          opacity: 0.8;
+        }
+
+        50% {
+          transform: scale(1.15);
+          opacity: 1;
+        }
+
+        100% {
+          transform: scale(0.95);
+          opacity: 0.8;
+        }
       }
 
-      /* Fade Out for items being deleted */
-      .card-deleting {
-        opacity: 0 !important;
-        transform: scale(0.9) translateY(10px) !important;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      #disconnectDbBtn:hover {
+        background: rgba(255, 82, 82, 0.12) !important;
+        border-color: rgba(255, 82, 82, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(255, 82, 82, 0.1);
       }
     </style>
-  </head>
-  <body>
-    <div class="admin-layout">
-      <!-- Admin Header -->
-      <header class="admin-header">
-        <div class="container header-container">
-          <div class="admin-title-group">
-            <a class="brand" href="/" aria-label="Studio Neralu home">
-              <img class="brand-logo" src="assets/img/logo.jpg" alt="Studio Neralu logo" />
-              <span class="brand-text">
-                <span class="brand-name">Studio Neralu</span>
-                <span class="brand-tag">Architecture • Interiors</span>
-              </span>
-            </a>
-            <span class="admin-badge">Admin Dashboard</span>
-          </div>
-          
-          <div style="display: flex; align-items: center; gap: 1.5rem;">
-            <button id="openSettingsBtn" class="back-link" onclick="const modal = document.getElementById('settingsModal'); if (modal) modal.style.display = 'flex';" style="display: flex; background: none; border: none; cursor: pointer; color: var(--muted); font-weight: 500; font-family: inherit; font-size: 0.95rem; align-items: center; gap: 0.35rem; padding: 0; outline: none; transition: color 0.2s ease;">
-              <span>⚙️ Settings</span>
-            </button>
-          </div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2
+          style="font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; color: var(--primary-bronze); margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">
+          <span>⚙️</span> Database Settings
+        </h2>
+        <button type="button" class="close-modal-btn" id="closeSettingsBtn"
+          onclick="const modal = document.getElementById('settingsModal'); if (modal) modal.style.display = 'none';">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem; padding-top: 0.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+          <span style="color: var(--muted-2);">Connection Status:</span>
+          <span
+            style="display: flex; align-items: center; gap: 0.4rem; color: #4caf50; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem;">
+            <span
+              style="width: 7px; height: 7px; background: #4caf50; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #4caf50; animation: settingsPulse 2s infinite;"></span>
+            Active
+          </span>
         </div>
-      </header>
-
-      <!-- Admin Content -->
-      <main class="admin-main">
-        
-        <!-- MAIN DASHBOARD VIEW (Shown when Supabase is connected) -->
-        <div id="mainDashboardView" class="container" style="display: none;">
-          <div class="admin-grid">
-            
-            <!-- Left: Upload Form -->
-            <section class="panel-card">
-              <h2 id="formSectionTitle">Upload New Project</h2>
-              <form id="uploadForm" class="admin-form" autocomplete="off">
-                
-                <!-- File Dropzone -->
-                <div class="dropzone-area" id="dropzone">
-                  <div class="dropzone-icon">✦</div>
-                  <div class="dropzone-text">
-                    <span>Click to upload image</span> or drag & drop<br />
-                    <small style="color: var(--muted-2); font-size: 0.78rem; display: block; margin-top: 0.3rem;">PNG, JPG, JPEG, WEBP (Max 10MB)</small>
-                  </div>
-                  <input type="file" id="imageInput" name="image" class="dropzone-file-input" accept="image/*" />
-                  
-                  <!-- File Preview Overlay -->
-                  <div class="preview-container" id="previewContainer">
-                    <button type="button" class="remove-preview-btn" id="removePreviewBtn" aria-label="Remove image">×</button>
-                    <img id="previewImage" class="preview-image" src="" alt="Selected project thumbnail" />
-                  </div>
-                </div>
-
-                <label>
-                  <span>Project Title</span>
-                  <input type="text" id="titleInput" name="title" placeholder="e.g. Parashurama Theme Park" required />
-                </label>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
-                  <label>
-                    <span>Category</span>
-                    <select id="categoryInput" name="category">
-                      <option value="Residence">Residence</option>
-                      <option value="Commercial">Commercial</option>
-                      <option value="Public">Public</option>
-                      <option value="Styling">Styling</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </label>
-                  <label>
-                    <span>Location</span>
-                    <input type="text" id="locationInput" name="location" placeholder="e.g. India" required />
-                  </label>
-                </div>
-
-                <label>
-                  <span>Description</span>
-                  <textarea id="descriptionInput" name="description" placeholder="Describe the architectural concept, material palette, daylight elements..." required></textarea>
-                </label>
-
-                <div style="display: flex; flex-direction: column; gap: 0.6rem; width: 100%;">
-                  <button type="submit" class="submit-btn" id="submitBtn">
-                    <span>Upload & Publish Project</span>
-                  </button>
-                  <button type="button" class="submit-btn button-ghost" id="cancelEditBtn" style="display: none;">
-                    <span>Cancel Editing</span>
-                  </button>
-                </div>
-              </form>
-            </section>
-
-
-
-            <!-- Right: Active Projects Manager -->
-            <section class="panel-card" style="min-height: 500px;">
-              <h2>Manage Portfolio Works</h2>
-              <div id="worksListContainer" class="works-list-grid">
-                <!-- Works will be rendered here dynamically via assets/js/admin.js -->
-                <div style="grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 4rem 1rem;">
-                  <span class="spinner" style="border-top-color: var(--primary-bronze); width: 24px; height: 24px; margin-bottom: 0.8rem;"></span>
-                  <p>Loading projects list...</p>
-                </div>
-              </div>
-            </section>
-
-          </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+          <span style="color: var(--muted-2);">Project URL:</span>
+          <span id="settingsDbUrl"
+            style="color: var(--muted); font-family: monospace; font-size: 0.82rem;">Connecting...</span>
         </div>
 
-        <!-- SUPABASE SETUP VIEW (Shown when Supabase is NOT connected) -->
-        <div id="supabaseSetupView" class="container" style="display: none; max-width: 540px; margin: 2rem auto;">
-          <div style="text-align: center; margin-bottom: 1.5rem;">
-            <img src="assets/img/logo.jpg" alt="Studio Neralu" style="width: 70px; height: 70px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);" />
-          </div>
-          <section class="panel-card" style="box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6); border-color: rgba(210, 166, 121, 0.25);">
-            <h2 style="border-bottom: 1px solid var(--glass-border); padding-bottom: 0.75rem;">🔌 Connect Supabase</h2>
-            <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">
-              Your portfolio is ready to run serverless on GitHub Pages! Enter your Supabase Project API credentials below. You can copy these from your <strong>Supabase Dashboard → Project Settings → API</strong>.
-            </p>
-            <form id="setupForm" class="admin-form" autocomplete="off">
-              <label>
-                <span>Supabase Project URL</span>
-                <input type="url" id="setupUrlInput" placeholder="https://your-project-id.supabase.co" required />
-              </label>
-              <label>
-                <span>Supabase Anon Public API Key</span>
-                <input type="password" id="setupKeyInput" placeholder="eyJhbGciOiJIUzI1Ni..." required />
-              </label>
-              <button type="submit" class="submit-btn" style="margin-top: 0.5rem;">
-                <span>Connect & Initialize Database</span>
-              </button>
-            </form>
-          </section>
-        </div>
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.04); margin: 0.5rem 0;"></div>
 
-      </main>
-    </div>
-
-    <!-- Settings Modal Popup -->
-    <div id="settingsModal" class="modal-overlay" onclick="if(event.target === this) this.style.display = 'none';" style="display: none;">
-      <style>
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 9999;
-          animation: modalFadeIn 0.2s ease-out forwards;
-        }
-        
-        .modal-card {
-          background: rgba(22, 22, 22, 0.85);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(25px);
-          -webkit-backdrop-filter: blur(25px);
-          border-radius: 16px;
-          width: 100%;
-          max-width: 420px;
-          padding: 1.8rem 2.2rem;
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
-          transform: scale(0.95);
-          animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        
-        .modal-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.2rem;
-          padding-bottom: 0.8rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        
-        .close-modal-btn {
-          background: none;
-          border: none;
-          color: var(--muted);
-          font-size: 1.8rem;
-          cursor: pointer;
-          transition: color 0.2s;
-          line-height: 1;
-          padding: 0;
-          outline: none;
-        }
-        
-        .close-modal-btn:hover {
-          color: var(--danger-red);
-        }
-        
-        @keyframes modalFadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes modalScaleIn {
-          from { transform: scale(0.95); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes settingsPulse {
-          0% { transform: scale(0.95); opacity: 0.8; }
-          50% { transform: scale(1.15); opacity: 1; }
-          100% { transform: scale(0.95); opacity: 0.8; }
-        }
-        
-        #disconnectDbBtn:hover {
-          background: rgba(255, 82, 82, 0.12) !important;
-          border-color: rgba(255, 82, 82, 0.3) !important;
-          box-shadow: 0 4px 15px rgba(255, 82, 82, 0.1);
-        }
-      </style>
-      <div class="modal-card">
-        <div class="modal-header">
-          <h2 style="font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; color: var(--primary-bronze); margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">
-            <span>⚙️</span> Database Settings
-          </h2>
-          <button type="button" class="close-modal-btn" id="closeSettingsBtn" onclick="const modal = document.getElementById('settingsModal'); if (modal) modal.style.display = 'none';">&times;</button>
-        </div>
-        <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem; padding-top: 0.5rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
-            <span style="color: var(--muted-2);">Connection Status:</span>
-            <span style="display: flex; align-items: center; gap: 0.4rem; color: #4caf50; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem;">
-              <span style="width: 7px; height: 7px; background: #4caf50; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #4caf50; animation: settingsPulse 2s infinite;"></span>
-              Active
-            </span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
-            <span style="color: var(--muted-2);">Project URL:</span>
-            <span id="settingsDbUrl" style="color: var(--muted); font-family: monospace; font-size: 0.82rem;">Connecting...</span>
-          </div>
-          
-          <div style="border-top: 1px solid rgba(255, 255, 255, 0.04); margin: 0.5rem 0;"></div>
-          
-          <button type="button" id="disconnectDbBtn" class="delete-btn" style="background: rgba(255, 82, 82, 0.05); border: 1px solid rgba(255, 82, 82, 0.12); color: var(--danger-red); padding: 0.75rem 1rem; font-size: 0.88rem; border-radius: 999px; font-weight: 600; width: 100%; transition: all 0.2s ease; cursor: pointer; height: auto; min-height: unset; line-height: 1.2;">
-            <span>🔌 Disconnect Database</span>
-          </button>
-        </div>
+        <button type="button" id="disconnectDbBtn" class="delete-btn"
+          style="background: rgba(255, 82, 82, 0.05); border: 1px solid rgba(255, 82, 82, 0.12); color: var(--danger-red); padding: 0.75rem 1rem; font-size: 0.88rem; border-radius: 999px; font-weight: 600; width: 100%; transition: all 0.2s ease; cursor: pointer; height: auto; min-height: unset; line-height: 1.2;">
+          <span>🔌 Disconnect Database</span>
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- Toast Notification Container -->
-    <div class="toast-container" id="toastContainer"></div>
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="assets/js/config.js?v=20260517-1"></script>
-    <script src="assets/js/admin.js?v=20260517-1"></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js?v=20260517-1"></script>
+  <script src="assets/js/admin.js?v=20260517-1"></script>
+</body>
+
 </html>

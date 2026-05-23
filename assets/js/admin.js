@@ -1,6 +1,13 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
+// Google Analytics Event Tracking Helper
+const trackEvent = (eventName, params = {}) => {
+  if (typeof window.gtag === "function") {
+    window.gtag("event", eventName, params);
+  }
+};
+
 // Global Admin Dashboard State
 let activeWorks = [];
 let editingWorkId = null;

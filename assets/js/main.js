@@ -94,6 +94,14 @@ const initMailtoForm = () => {
       `Name: ${name}\nEmail: ${email}\nProject type: ${type}\n\nMessage:\n${message}\n`
     );
 
+    // Google Analytics Event Tracking
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "contact_form_submit", {
+        event_category: "Contact",
+        event_label: type
+      });
+    }
+
     window.location.href = `mailto:sam29rao@gmail.com?subject=${subject}&body=${body}`;
   });
 };
