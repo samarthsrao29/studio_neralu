@@ -1,511 +1,313 @@
-const $ = (selector, root = document) => root.querySelector(selector);
-const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+/* ============================================================
+   Studio Neralu — Admin JS
+   Uses local Express REST API (/api/works) via server.js
+   ============================================================ */
 
-// Google Analytics Event Tracking Helper
-const trackEvent = (eventName, params = {}) => {
-  if (typeof window.gtag === "function") {
-    window.gtag("event", eventName, params);
-  }
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+// Track GA events
+const trackEvent = (name, params = {}) => {
+  if (typeof window.gtag === 'function') window.gtag('event', name, params);
 };
 
-// Global Admin Dashboard State
+// In-memory state
 let activeWorks = [];
 let editingWorkId = null;
-let supabaseClient = null;
 
-// Toast Notification Helper
-const showToast = (message, type = "success") => {
-  const container = $("#toastContainer");
+/* ---------- Toast ---------- */
+const showToast = (message, type = 'success') => {
+  const container = $('#toastContainer');
   if (!container) return;
 
-  const toast = document.createElement("div");
+  const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   toast.innerHTML = `
-    <span style="font-size: 1.1rem;">${type === "success" ? "✓" : "✕"}</span>
-    <span style="font-size: 0.92rem; font-weight: 550;">${message}</span>
+    <span style="font-size:1.1rem">${type === 'success' ? '✓' : '✕'}</span>
+    <span style="font-size:0.92rem;font-weight:550">${message}</span>
   `;
-
   container.appendChild(toast);
 
-  // Self dismiss after 4 seconds
   setTimeout(() => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateY(-15px) scale(0.95)";
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-15px) scale(0.95)';
+    setTimeout(() => toast.remove(), 300);
   }, 4000);
 };
 
-// Image Preview Handling
+/* ---------- Image Preview / Dropzone ---------- */
 const setupImagePreview = () => {
-  const dropzone = $("#dropzone");
-  const fileInput = $("#imageInput");
-  const previewContainer = $("#previewContainer");
-  const previewImage = $("#previewImage");
-  const removeBtn = $("#removePreviewBtn");
+  const dropzone = $('#dropzone');
+  const fileInput = $('#imageInput');
+  const previewContainer = $('#previewContainer');
+  const previewImage = $('#previewImage');
+  const removeBtn = $('#removePreviewBtn');
 
   if (!dropzone || !fileInput) return;
 
   const displayFile = (file) => {
     if (!file) return;
-
-    // Validate size (10MB limit)
     if (file.size > 10 * 1024 * 1024) {
-      showToast("File size too large. Maximum size is 10MB.", "error");
-      fileInput.value = "";
+      showToast('File too large. Maximum 10MB.', 'error');
+      fileInput.value = '';
       return;
     }
-
-    // Validate type
-    if (!file.type.startsWith("image/")) {
-      showToast("Only image files are allowed.", "error");
-      fileInput.value = "";
+    if (!file.type.startsWith('image/')) {
+      showToast('Only image files are allowed.', 'error');
+      fileInput.value = '';
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (e) => {
       previewImage.src = e.target.result;
-      previewContainer.style.display = "flex";
+      previewContainer.style.display = 'flex';
     };
     reader.readAsDataURL(file);
   };
 
-  fileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    displayFile(file);
+  fileInput.addEventListener('change', (e) => displayFile(e.target.files[0]));
+
+  ['dragenter', 'dragover'].forEach((ev) =>
+    dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); }, false)
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); }, false)
+  );
+  dropzone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file) { fileInput.files = e.dataTransfer.files; displayFile(file); }
   });
 
-  // Drag and Drop Events
-  ["dragenter", "dragover"].forEach((eventName) => {
-    dropzone.addEventListener(eventName, (e) => {
-      e.preventDefault();
-      dropzone.classList.add("dragover");
-    }, false);
-  });
-
-  ["dragleave", "drop"].forEach((eventName) => {
-    dropzone.addEventListener(eventName, (e) => {
-      e.preventDefault();
-      dropzone.classList.remove("dragover");
-    }, false);
-  });
-
-  dropzone.addEventListener("drop", (e) => {
-    const dt = e.dataTransfer;
-    const file = dt.files[0];
-    if (file) {
-      fileInput.files = dt.files;
-      displayFile(file);
-    }
-  });
-
-  // Clear preview
-  removeBtn.addEventListener("click", (e) => {
-    e.stopPropagation(); // Avoid triggering file input click
-    fileInput.value = "";
-    previewImage.src = "";
-    previewContainer.style.display = "none";
+  removeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.value = '';
+    previewImage.src = '';
+    previewContainer.style.display = 'none';
   });
 };
 
-// Start editing an existing work
+/* ---------- Load & Render Works ---------- */
+const loadWorks = async () => {
+  const container = $('#worksListContainer');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem 1rem">
+      <span class="spinner" style="border-top-color:var(--primary-bronze);width:24px;height:24px;margin-bottom:0.8rem"></span>
+      <p>Loading projects…</p>
+    </div>`;
+
+  try {
+    const res = await fetch('/api/works');
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    const works = await res.json();
+    activeWorks = works;
+    renderWorksList(works, container);
+  } catch (err) {
+    console.error('Error loading works:', err);
+    container.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;color:var(--danger-red);padding:3rem 1rem">
+        <p>⚠ Failed to load projects: ${err.message}</p>
+      </div>`;
+  }
+};
+
+const renderWorksList = (works, container) => {
+  if (!works || works.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:4rem 1rem">
+        <p>No projects yet. Use the upload panel on the left to add your first work.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = works.map((work) => `
+    <article class="admin-card" id="work-card-${work.id}">
+      <div class="admin-card-media" style="background-image:url('${work.image}')"></div>
+      <div class="admin-card-body">
+        <h3>${work.title}</h3>
+        <div class="admin-card-meta">
+          <span>${work.category}</span><span>•</span><span>${work.location}</span>
+        </div>
+        <p>${work.description}</p>
+        <div style="display:flex;gap:0.6rem;margin-top:auto;width:100%">
+          <button type="button"
+            class="submit-btn button-ghost"
+            style="padding:0.65rem 1rem;border-radius:999px;font-size:0.88rem;border-color:var(--glass-border);background:rgba(255,255,255,0.04);color:var(--primary-bronze);box-shadow:none;font-weight:600;cursor:pointer;flex-grow:1;min-height:unset;width:unset"
+            onclick="startEditWork('${work.id}')">
+            <span>✏ Edit</span>
+          </button>
+          <button type="button"
+            class="delete-btn"
+            style="padding:0.65rem 1rem;border-radius:999px;font-size:0.88rem;flex-grow:1"
+            onclick="deleteWork('${work.id}')">
+            <span>🗑 Delete</span>
+          </button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+};
+
+/* ---------- Edit ---------- */
 window.startEditWork = (id) => {
   const work = activeWorks.find((w) => String(w.id) === String(id));
   if (!work) return;
 
   editingWorkId = id;
 
-  // Scroll form card into view smoothly
-  const formCard = $("#uploadForm").closest(".panel-card");
-  if (formCard) {
-    formCard.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  const formCard = $('#uploadForm')?.closest('.panel-card');
+  if (formCard) formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  // Populate inputs
-  $("#titleInput").value = work.title;
-  $("#categoryInput").value = work.category;
-  $("#locationInput").value = work.location;
-  $("#descriptionInput").value = work.description;
+  $('#titleInput').value = work.title;
+  $('#categoryInput').value = work.category;
+  $('#locationInput').value = work.location;
+  $('#descriptionInput').value = work.description;
 
-  // Show active image in preview container
-  const previewContainer = $("#previewContainer");
-  const previewImage = $("#previewImage");
+  const previewContainer = $('#previewContainer');
+  const previewImage = $('#previewImage');
   previewImage.src = work.image;
-  previewContainer.style.display = "flex";
+  previewContainer.style.display = 'flex';
 
-  // Update layout header and buttons
-  $("#formSectionTitle").textContent = "Edit Project";
-  $("#submitBtn").querySelector("span").textContent = "Save Changes";
-  $("#cancelEditBtn").style.display = "block";
+  $('#formSectionTitle').textContent = 'Edit Project';
+  $('#submitBtn').querySelector('span').textContent = 'Save Changes';
+  $('#cancelEditBtn').style.display = 'block';
 };
 
-// Cancel editing and restore upload mode
 window.cancelEditing = () => {
   editingWorkId = null;
-
-  const form = $("#uploadForm");
+  const form = $('#uploadForm');
   if (form) form.reset();
 
-  // Reset preview
-  const previewContainer = $("#previewContainer");
-  const previewImage = $("#previewImage");
-  const fileInput = $("#imageInput");
-  
-  if (previewContainer) previewContainer.style.display = "none";
-  if (previewImage) previewImage.src = "";
-  if (fileInput) fileInput.value = "";
+  const previewContainer = $('#previewContainer');
+  const previewImage = $('#previewImage');
+  const fileInput = $('#imageInput');
+  if (previewContainer) previewContainer.style.display = 'none';
+  if (previewImage) previewImage.src = '';
+  if (fileInput) fileInput.value = '';
 
-  // Restore layout headers and buttons
-  $("#formSectionTitle").textContent = "Upload New Project";
-  $("#submitBtn").querySelector("span").textContent = "Upload & Publish Project";
-  $("#cancelEditBtn").style.display = "none";
+  $('#formSectionTitle').textContent = 'Upload New Project';
+  $('#submitBtn').querySelector('span').textContent = 'Upload & Publish Project';
+  $('#cancelEditBtn').style.display = 'none';
 };
 
-// Fetch and Render Works
-const loadWorks = async () => {
-  const container = $("#worksListContainer");
-  if (!container) return;
-
-  if (!supabaseClient) return;
-
-  try {
-    const { data: works, error } = await supabaseClient
-      .from("works")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-    
-    // Cache works array in memory for robust edit lookups
-    activeWorks = works;
-
-    if (works.length === 0) {
-      container.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 4rem 1rem;">
-          <p>No projects loaded yet. Use the upload panel to add your first work.</p>
-        </div>`;
-      return;
-    }
-
-    container.innerHTML = works
-      .map(
-        (work) => `
-      <article class="admin-card" id="work-card-${work.id}">
-        <div class="admin-card-media" style="background-image: url('${work.image}');"></div>
-        <div class="admin-card-body">
-          <h3>${work.title}</h3>
-          <div class="admin-card-meta">
-            <span>${work.category}</span>
-            <span>•</span>
-            <span>${work.location}</span>
-          </div>
-          <p>${work.description}</p>
-          <div style="display: flex; gap: 0.6rem; margin-top: auto; width: 100%;">
-            <button type="button" class="submit-btn button-ghost" style="padding: 0.65rem 1rem; border-radius: 999px; font-size: 0.88rem; border-color: var(--glass-border); background: rgba(255, 255, 255, 0.04); color: var(--primary-bronze); box-shadow: none; font-weight: 600; cursor: pointer; flex-grow: 1; min-height: unset; width: unset;" onclick="startEditWork('${work.id}')">
-              <span>✏ Edit</span>
-            </button>
-            <button type="button" class="delete-btn" style="padding: 0.65rem 1rem; border-radius: 999px; font-size: 0.88rem; flex-grow: 1;" onclick="deleteWork('${work.id}')">
-              <span>🗑 Delete</span>
-            </button>
-          </div>
-        </div>
-      </article>
-    `
-      )
-      .join("");
-  } catch (err) {
-    console.error("Error loading works:", err);
-    container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; color: var(--danger-red); padding: 4rem 1rem;">
-        <p>Failed to load projects. Make sure your Supabase "works" table is created and policies are configured.</p>
-      </div>`;
-  }
-};
-
-// Handle Setup Form Submission
-const setupDatabaseConfig = () => {
-  const form = $("#setupForm");
-  if (!form) return;
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const url = $("#setupUrlInput").value.trim();
-    const key = $("#setupKeyInput").value.trim();
-
-    if (!url || !key) {
-      showToast("Please fill in both fields.", "error");
-      return;
-    }
-
-    localStorage.setItem("neralu_supabase_url", url);
-    localStorage.setItem("neralu_supabase_key", key);
-
-    showToast("Supabase Database successfully connected!");
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  });
-};
-
-// Handle Form Submission (Create & Edit)
+/* ---------- Form Submit (Create / Edit) ---------- */
 const setupFormSubmit = () => {
-  const form = $("#uploadForm");
-  const submitBtn = $("#submitBtn");
-  const cancelBtn = $("#cancelEditBtn");
+  const form = $('#uploadForm');
+  const submitBtn = $('#submitBtn');
+  const cancelBtn = $('#cancelEditBtn');
+  if (!form || !submitBtn) return;
 
-  if (!form || !submitBtn || !supabaseClient) return;
+  if (cancelBtn) cancelBtn.addEventListener('click', () => cancelEditing());
 
-  // Bind cancel action
-  if (cancelBtn) {
-    cancelBtn.addEventListener("click", () => {
-      cancelEditing();
-    });
-  }
-
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const title = $("#titleInput").value.trim();
-    const location = $("#locationInput").value.trim();
-    const category = $("#categoryInput").value;
-    const description = $("#descriptionInput").value.trim();
-    const imageFile = $("#imageInput").files[0];
+    const title = $('#titleInput').value.trim();
+    const location = $('#locationInput').value.trim();
+    const category = $('#categoryInput').value;
+    const description = $('#descriptionInput').value.trim();
+    const imageFile = $('#imageInput').files[0];
 
-    // Image validation: strictly required only in creation mode
     if (!editingWorkId && !imageFile) {
-      showToast("Please upload an image for the project.", "error");
+      showToast('Please upload an image for the project.', 'error');
       return;
     }
-
     if (!title || !location || !description) {
-      showToast("Please fill in all details.", "error");
+      showToast('Please fill in all fields.', 'error');
       return;
     }
 
-    // Set loading state on button
+    // Set loading state
     submitBtn.disabled = true;
-    const originalText = submitBtn.innerHTML;
-    
-    const loadingText = editingWorkId ? "Saving Changes..." : "Uploading Project...";
+    const originalHTML = submitBtn.innerHTML;
     submitBtn.innerHTML = `
       <span class="spinner btn-spinner"></span>
-      <span>${loadingText}</span>
+      <span>${editingWorkId ? 'Saving Changes…' : 'Uploading Project…'}</span>
     `;
 
     try {
-      let imageUrl = "";
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('category', category);
+      formData.append('location', location);
+      formData.append('description', description);
+      if (imageFile) formData.append('image', imageFile);
 
-      // 1. Image upload handling
-      if (imageFile) {
-        // Construct standard unique filepath inside the 'portfolio' storage bucket
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.floor(Math.random() * 1000000)}.${fileExt}`;
-        
-        const { data: uploadData, error: uploadError } = await supabaseClient.storage
-          .from("portfolio")
-          .upload(fileName, imageFile);
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: { publicUrl } } = supabaseClient.storage
-          .from("portfolio")
-          .getPublicUrl(fileName);
-          
-        imageUrl = publicUrl;
-
-        // Clean up: If in EDIT mode and new image uploaded, delete the old file from bucket
-        if (editingWorkId) {
-          const oldWork = activeWorks.find(w => String(w.id) === String(editingWorkId));
-          if (oldWork && oldWork.image.includes("/storage/v1/object/public/portfolio/")) {
-            const oldFileName = oldWork.image.split("/").pop();
-            await supabaseClient.storage.from("portfolio").remove([oldFileName]);
-          }
-        }
-      }
-
-      // 2. Database transaction handling
+      let res;
       if (editingWorkId) {
-        // EDIT MODE (PUT)
-        const updatePayload = {
-          title,
-          category,
-          location,
-          description
-        };
-        
-        if (imageUrl) {
-          updatePayload.image = imageUrl;
-        }
-
-        const { error: dbError } = await supabaseClient
-          .from("works")
-          .update(updatePayload)
-          .eq("id", Number(editingWorkId));
-
-        if (dbError) throw dbError;
-        showToast("Project updated successfully!");
+        // PUT /api/works/:id
+        res = await fetch(`/api/works/${editingWorkId}`, {
+          method: 'PUT',
+          body: formData,
+        });
       } else {
-        // UPLOAD MODE (POST)
-        const { error: dbError } = await supabaseClient
-          .from("works")
-          .insert([{
-            title,
-            category,
-            location,
-            description,
-            image: imageUrl
-          }]);
-
-        if (dbError) throw dbError;
-        showToast("Project successfully uploaded and published!");
+        // POST /api/works
+        res = await fetch('/api/works', {
+          method: 'POST',
+          body: formData,
+        });
       }
 
-      // Reset form and UI state back to upload mode
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Server error');
+
+      showToast(editingWorkId ? 'Project updated successfully!' : 'Project uploaded and published!');
+      trackEvent('admin_work_save', { mode: editingWorkId ? 'edit' : 'create' });
+
       cancelEditing();
-      
-      // Reload works list
       await loadWorks();
     } catch (err) {
-      console.error("Supabase process error:", err);
-      showToast(err.message || "An error occurred while saving project.", "error");
+      console.error('Submit error:', err);
+      showToast(err.message || 'An error occurred while saving.', 'error');
     } finally {
-      // Restore button state
       submitBtn.disabled = false;
-      submitBtn.innerHTML = originalText;
+      submitBtn.innerHTML = originalHTML;
     }
   });
 };
 
-// Global Delete Function (Triggered by dynamic cards)
+/* ---------- Delete ---------- */
 window.deleteWork = async (id) => {
-  if (!confirm("Are you sure you want to permanently delete this project?")) return;
+  if (!confirm('Permanently delete this project?')) return;
 
-  if (!supabaseClient) return;
+  if (String(editingWorkId) === String(id)) cancelEditing();
 
-  // If deleting the project currently being edited, cancel edit mode first
-  if (String(editingWorkId) === String(id)) {
-    cancelEditing();
-  }
-
-  const cardElement = $(`#work-card-${id}`);
-  const work = activeWorks.find(w => String(w.id) === String(id));
+  const cardEl = $(`#work-card-${id}`);
 
   try {
-    // 1. Delete from PostgreSQL works table
-    const { error: dbError } = await supabaseClient
-      .from("works")
-      .delete()
-      .eq("id", Number(id));
+    const res = await fetch(`/api/works/${id}`, { method: 'DELETE' });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Server error');
 
-    if (dbError) throw dbError;
-
-    // 2. Delete the associated image from Supabase Storage bucket to free space
-    if (work && work.image.includes("/storage/v1/object/public/portfolio/")) {
-      const fileName = work.image.split("/").pop();
-      await supabaseClient.storage.from("portfolio").remove([fileName]);
-    }
-
-    // Success animation: add fade-out class
-    if (cardElement) {
-      cardElement.classList.add("card-deleting");
-      
-      // Remove from DOM after animation completes
+    if (cardEl) {
+      cardEl.classList.add('card-deleting');
       setTimeout(() => {
-        cardElement.remove();
-        
-        // Check if there are remaining cards
-        const remainingCards = $$(".admin-card");
-        if (remainingCards.length === 0) {
-          loadWorks();
-        }
+        cardEl.remove();
+        if ($$('.admin-card').length === 0) loadWorks();
       }, 400);
     }
 
-    showToast("Project removed successfully.");
+    showToast('Project removed successfully.');
+    trackEvent('admin_work_delete');
   } catch (err) {
-    console.error("Delete error:", err);
-    showToast(err.message || "Could not delete project.", "error");
+    console.error('Delete error:', err);
+    showToast(err.message || 'Could not delete project.', 'error');
   }
 };
 
-// Initialize Admin functions on load
-document.addEventListener("DOMContentLoaded", () => {
-  // 1. Resolve credentials
-  const creds = window.getSupabaseCredentials ? window.getSupabaseCredentials() : { isConfigured: false };
+/* ---------- Boot ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  // Always show the main dashboard — no Supabase setup needed
+  const setupView = $('#supabaseSetupView');
+  const mainView = $('#mainDashboardView');
+  const settingsBtn = $('#openSettingsBtn');
 
-  if (!creds.isConfigured) {
-    // Show Connect Setup View, hide main dashboard
-    $("#supabaseSetupView").style.display = "block";
-    $("#mainDashboardView").style.display = "none";
-    const openSettingsBtn = $("#openSettingsBtn");
-    if (openSettingsBtn) openSettingsBtn.style.display = "none";
-    
-    // Bind Setup submit listener
-    setupDatabaseConfig();
-  } else {
-    // Show Main Dashboard, hide Setup View
-    $("#supabaseSetupView").style.display = "none";
-    $("#mainDashboardView").style.display = "block";
+  if (setupView) setupView.style.display = 'none';
+  if (mainView) mainView.style.display = 'block';
+  if (settingsBtn) settingsBtn.style.display = 'none'; // hide DB settings — not relevant
 
-    // Populate settings connection details dynamically
-    const settingsDbUrl = $("#settingsDbUrl");
-    if (settingsDbUrl && creds.url) {
-      try {
-        const urlObj = new URL(creds.url);
-        const sub = urlObj.hostname.split(".")[0];
-        const cleanSub = sub.length > 8 ? sub.substring(0, 6) + "..." : sub;
-        settingsDbUrl.textContent = `https://${cleanSub}.supabase.co`;
-      } catch (e) {
-        settingsDbUrl.textContent = creds.url;
-      }
-    }
-
-    // Connect disconnect toggle inside Modal
-    const disconnectBtn = $("#disconnectDbBtn");
-    if (disconnectBtn) {
-      disconnectBtn.addEventListener("click", () => {
-        if (confirm("Disconnect from the Supabase database? You can reconnect at any time by pasting your credentials again.")) {
-          localStorage.removeItem("neralu_supabase_url");
-          localStorage.removeItem("neralu_supabase_key");
-          window.location.reload();
-        }
-      });
-    }
-
-    // Settings Modal Triggers
-    const openSettingsBtn = $("#openSettingsBtn");
-    if (openSettingsBtn) {
-      openSettingsBtn.style.display = "flex";
-      openSettingsBtn.addEventListener("click", () => {
-        $("#settingsModal").style.display = "flex";
-      });
-    }
-
-    const closeSettingsBtn = $("#closeSettingsBtn");
-    if (closeSettingsBtn) {
-      closeSettingsBtn.addEventListener("click", () => {
-        $("#settingsModal").style.display = "none";
-      });
-    }
-
-    const settingsModal = $("#settingsModal");
-    if (settingsModal) {
-      settingsModal.addEventListener("click", (e) => {
-        if (e.target === settingsModal) {
-          settingsModal.style.display = "none";
-        }
-      });
-    }
-
-    // Initialize Supabase SDK client globally
-    supabaseClient = supabase.createClient(creds.url, creds.anonKey);
-
-    // Initialize regular upload panel functionality
-    setupImagePreview();
-    setupFormSubmit();
-    loadWorks();
-  }
+  setupImagePreview();
+  setupFormSubmit();
+  loadWorks();
 });

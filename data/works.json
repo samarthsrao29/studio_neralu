@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "title": "Parashurama Theme Park",
+    "title": "Parashurama Theme Park.",
     "description": "Karkala — a panoramic setting with a strong cultural centerpiece.",
     "category": "Public",
     "location": "udupi",
@@ -14,14 +14,6 @@
     "category": "Residence",
     "location": "India",
     "image": "assets/img/work-bhagavathi.jpg"
-  },
-  {
-    "id": "3",
-    "title": "Bhagavathi Mane / Devi Nilaya",
-    "description": "Traditional lines with a contemporary calm—crafted for everyday shade.",
-    "category": "Residence",
-    "location": "India",
-    "image": "assets/img/work-bhagavathi-2.jpg"
   },
   {
     "id": "4",

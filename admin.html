@@ -25,23 +25,43 @@
       --glass-bg: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.08);
       --glass-hover: rgba(255, 255, 255, 0.06);
+
+      /* Aliases for compatibility with new style.css variable names */
+      --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 30px 90px rgba(0, 0, 0, 0.65);
+      --muted-2: rgba(240, 237, 232, 0.38);
     }
 
     body {
-      background: #060709;
+      background: #0b0b0b;
       padding-top: 0;
+      cursor: auto;
     }
 
     body::before {
-      background: radial-gradient(1000px 650px at 85% 5%, rgba(210, 166, 121, 0.15), transparent 60%),
-        radial-gradient(900px 650px at 15% 90%, rgba(210, 166, 121, 0.08), transparent 55%),
-        linear-gradient(180deg, #060709, #0f1114);
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(1000px 650px at 85% 5%, rgba(200, 169, 126, 0.12), transparent 60%),
+        radial-gradient(900px 650px at 15% 90%, rgba(200, 169, 126, 0.07), transparent 55%),
+        linear-gradient(180deg, #0b0b0b, #111111);
     }
 
     .admin-layout {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+
+    /* Restore .container for admin layout (removed from main style.css) */
+    .container {
+      width: min(1200px, calc(100% - 3rem));
+      margin-inline: auto;
     }
 
     .admin-header {

@@ -270,10 +270,48 @@ const renderWorks = (works, container) => {
   }
 };
 
+const sortWorksNewestFirst = (works) => {
+  if (!Array.isArray(works)) return [];
+
+  return [...works].sort((a, b) => {
+    const aTime = a?.created_at
+      ? new Date(a.created_at).getTime()
+      : Number(a?.id || 0);
+    const bTime = b?.created_at
+      ? new Date(b.created_at).getTime()
+      : Number(b?.id || 0);
+
+    return bTime - aTime;
+  });
+};
+
+const loadWorksFromLocalApi = async () => {
+  const response = await fetch('/api/works');
+  if (!response.ok) return null;
+  const works = await response.json();
+  return sortWorksNewestFirst(works);
+};
+
 /* ---------- Dynamic Works (Supabase) ---------- */
 const initDynamicWorks = async () => {
   const container = $('#works-container');
   if (!container) return;
+
+  try {
+    const localWorks = await loadWorksFromLocalApi();
+    if (localWorks) {
+      if (localWorks.length === 0) {
+        console.log('Local works DB empty — rendering offline defaults.');
+        renderWorks(DEFAULT_WORKS, container);
+        return;
+      }
+
+      renderWorks(localWorks, container);
+      return;
+    }
+  } catch (err) {
+    console.log('Local API unavailable — trying Supabase.', err);
+  }
 
   const creds = window.getSupabaseCredentials
     ? window.getSupabaseCredentials()
@@ -287,20 +325,19 @@ const initDynamicWorks = async () => {
 
   try {
     const supabaseClient = supabase.createClient(creds.url, creds.anonKey);
-    const { data: works, error } = await supabaseClient
-      .from('works')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data: works, error } = await supabaseClient.from('works').select('*');
 
     if (error) throw error;
 
-    if (!works || works.length === 0) {
+    const sortedWorks = sortWorksNewestFirst(works);
+
+    if (sortedWorks.length === 0) {
       console.log('Supabase DB empty — rendering offline defaults.');
       renderWorks(DEFAULT_WORKS, container);
       return;
     }
 
-    renderWorks(works, container);
+    renderWorks(sortedWorks, container);
   } catch (err) {
     console.error('Supabase error — falling back to local defaults:', err);
     renderWorks(DEFAULT_WORKS, container);
