@@ -102,7 +102,7 @@ const initMailtoForm = () => {
       });
     }
 
-    window.location.href = `mailto:sam29rao@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:ar.sampreethrao@studioneralu.com?subject=${subject}&body=${body}`;
   });
 };
 
