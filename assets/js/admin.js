@@ -1,6 +1,6 @@
 /* ============================================================
    Studio Neralu — Admin JS
-   Uses local Express REST API (/api/works) via server.js
+   Uses local Express API on localhost and Supabase on GitHub Pages
    ============================================================ */
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -14,6 +14,20 @@ const trackEvent = (name, params = {}) => {
 // In-memory state
 let activeWorks = [];
 let editingWorkId = null;
+let supabaseClient = null;
+
+const isLocalDev = () => ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+const canUseLocalApi = () => isLocalDev();
+const canUseSupabase = () => !!(window.getSupabaseCredentials && window.getSupabaseCredentials().isConfigured);
+
+const sortWorksNewestFirst = (works) => {
+  if (!Array.isArray(works)) return [];
+  return [...works].sort((a, b) => {
+    const aTime = a?.created_at ? new Date(a.created_at).getTime() : Number(a?.id || 0);
+    const bTime = b?.created_at ? new Date(b.created_at).getTime() : Number(b?.id || 0);
+    return bTime - aTime;
+  });
+};
 
 /* ---------- Toast ---------- */
 const showToast = (message, type = 'success') => {
@@ -86,6 +100,35 @@ const setupImagePreview = () => {
   });
 };
 
+const getSupabaseClient = () => {
+  if (supabaseClient) return supabaseClient;
+  const creds = window.getSupabaseCredentials ? window.getSupabaseCredentials() : { isConfigured: false };
+  if (!creds.isConfigured || typeof supabase === 'undefined') return null;
+  supabaseClient = supabase.createClient(creds.url, creds.anonKey);
+  return supabaseClient;
+};
+
+const uploadImageToSupabase = async (file) => {
+  const client = getSupabaseClient();
+  if (!client) throw new Error('Supabase is not configured.');
+
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.floor(Math.random() * 1000000)}.${fileExt}`;
+  const { error: uploadError } = await client.storage.from('portfolio').upload(fileName, file);
+  if (uploadError) throw uploadError;
+
+  const { data } = client.storage.from('portfolio').getPublicUrl(fileName);
+  return { path: fileName, url: data.publicUrl };
+};
+
+const deleteSupabaseImage = async (imageUrl) => {
+  if (!imageUrl || !imageUrl.includes('/storage/v1/object/public/portfolio/')) return;
+  const client = getSupabaseClient();
+  if (!client) return;
+  const fileName = imageUrl.split('/').pop();
+  await client.storage.from('portfolio').remove([fileName]);
+};
+
 /* ---------- Load & Render Works ---------- */
 const loadWorks = async () => {
   const container = $('#worksListContainer');
@@ -98,11 +141,23 @@ const loadWorks = async () => {
     </div>`;
 
   try {
-    const res = await fetch('/api/works');
-    if (!res.ok) throw new Error(`Server error: ${res.status}`);
-    const works = await res.json();
-    activeWorks = works;
-    renderWorksList(works, container);
+    let works = [];
+
+    if (canUseLocalApi()) {
+      const res = await fetch('/api/works');
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      works = await res.json();
+    } else if (canUseSupabase()) {
+      const client = getSupabaseClient();
+      const { data, error } = await client.from('works').select('*');
+      if (error) throw error;
+      works = data || [];
+    } else {
+      throw new Error('No data source configured.');
+    }
+
+    activeWorks = sortWorksNewestFirst(works);
+    renderWorksList(activeWorks, container);
   } catch (err) {
     console.error('Error loading works:', err);
     container.innerHTML = `
@@ -227,30 +282,40 @@ const setupFormSubmit = () => {
     `;
 
     try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('category', category);
-      formData.append('location', location);
-      formData.append('description', description);
-      if (imageFile) formData.append('image', imageFile);
+      if (canUseLocalApi()) {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('category', category);
+        formData.append('location', location);
+        formData.append('description', description);
+        if (imageFile) formData.append('image', imageFile);
 
-      let res;
-      if (editingWorkId) {
-        // PUT /api/works/:id
-        res = await fetch(`/api/works/${editingWorkId}`, {
-          method: 'PUT',
+        const res = await fetch(editingWorkId ? `/api/works/${editingWorkId}` : '/api/works', {
+          method: editingWorkId ? 'PUT' : 'POST',
           body: formData,
         });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Server error');
       } else {
-        // POST /api/works
-        res = await fetch('/api/works', {
-          method: 'POST',
-          body: formData,
-        });
-      }
+        const client = getSupabaseClient();
+        if (!client) throw new Error('Supabase is not configured.');
 
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Server error');
+        let imageUrl = activeWorks.find((w) => String(w.id) === String(editingWorkId))?.image || '';
+        if (imageFile) {
+          const uploaded = await uploadImageToSupabase(imageFile);
+          imageUrl = uploaded.url;
+          if (editingWorkId) {
+            const oldWork = activeWorks.find((w) => String(w.id) === String(editingWorkId));
+            if (oldWork) await deleteSupabaseImage(oldWork.image);
+          }
+        }
+
+        const payload = { title, category, location, description, image: imageUrl };
+        const { error } = editingWorkId
+          ? await client.from('works').update(payload).eq('id', editingWorkId)
+          : await client.from('works').insert([payload]);
+        if (error) throw error;
+      }
 
       showToast(editingWorkId ? 'Project updated successfully!' : 'Project uploaded and published!');
       trackEvent('admin_work_save', { mode: editingWorkId ? 'edit' : 'create' });
@@ -276,9 +341,18 @@ window.deleteWork = async (id) => {
   const cardEl = $(`#work-card-${id}`);
 
   try {
-    const res = await fetch(`/api/works/${id}`, { method: 'DELETE' });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || 'Server error');
+    if (canUseLocalApi()) {
+      const res = await fetch(`/api/works/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Server error');
+    } else {
+      const client = getSupabaseClient();
+      if (!client) throw new Error('Supabase is not configured.');
+      const work = activeWorks.find((w) => String(w.id) === String(id));
+      const { error } = await client.from('works').delete().eq('id', id);
+      if (error) throw error;
+      if (work) await deleteSupabaseImage(work.image);
+    }
 
     if (cardEl) {
       cardEl.classList.add('card-deleting');
@@ -305,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (setupView) setupView.style.display = 'none';
   if (mainView) mainView.style.display = 'block';
-  if (settingsBtn) settingsBtn.style.display = 'none'; // hide DB settings — not relevant
+  if (settingsBtn) settingsBtn.style.display = canUseSupabase() && !canUseLocalApi() ? 'flex' : 'none';
 
   setupImagePreview();
   setupFormSubmit();
