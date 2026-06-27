@@ -1,91 +1,172 @@
-const $ = (selector, root = document) => root.querySelector(selector);
-const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+/* ============================================================
+   Studio Neralu — Main JS (Cuberto-inspired)
+   ============================================================ */
 
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+/* ---------- Year ---------- */
 const setYear = () => {
-  const year = $("#year");
-  if (year) year.textContent = String(new Date().getFullYear());
+  const el = $('#year');
+  if (el) el.textContent = new Date().getFullYear();
 };
 
+/* Lenis smooth scroll removed — using native browser scroll */
+
+/* ---------- Sticky Header ---------- */
 const initStickyHeader = () => {
-  const header = $(".site-header");
+  const header = $('#site-header');
   if (!header) return;
 
   const onScroll = () => {
-    header.classList.toggle("is-elevated", window.scrollY > 8);
+    header.classList.toggle('scrolled', window.scrollY > 30);
   };
   onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
 };
 
+/* ---------- Mobile Nav ---------- */
 const initMobileNav = () => {
-  const toggle = $(".nav-toggle");
-  const links = $("#nav-links");
+  const toggle = $('#nav-toggle');
+  const links = $('#nav-links');
+  const hamburger = toggle ? toggle.querySelector('.hamburger') : null;
   if (!toggle || !links) return;
 
   const close = () => {
-    toggle.setAttribute("aria-expanded", "false");
-    links.classList.remove("is-open");
+    toggle.setAttribute('aria-expanded', 'false');
+    links.classList.remove('is-open');
+    if (hamburger) hamburger.classList.remove('is-open');
   };
 
-  toggle.addEventListener("click", () => {
-    const next = toggle.getAttribute("aria-expanded") !== "true";
-    toggle.setAttribute("aria-expanded", String(next));
-    links.classList.toggle("is-open", next);
+  toggle.addEventListener('click', () => {
+    const next = toggle.getAttribute('aria-expanded') !== 'true';
+    toggle.setAttribute('aria-expanded', String(next));
+    links.classList.toggle('is-open', next);
+    if (hamburger) hamburger.classList.toggle('is-open', next);
   });
 
-  document.addEventListener("click", (e) => {
-    if (!links.classList.contains("is-open")) return;
-    const target = e.target;
-    if (!(target instanceof Element)) return;
-    if (links.contains(target) || toggle.contains(target)) return;
+  document.addEventListener('click', (e) => {
+    if (!links.classList.contains('is-open')) return;
+    if (!(e.target instanceof Element)) return;
+    if (links.contains(e.target) || toggle.contains(e.target)) return;
     close();
   });
 
-  $$("#nav-links a").forEach((a) => a.addEventListener("click", close));
+  $$('#nav-links a').forEach((a) => a.addEventListener('click', close));
 };
 
-const initReveal = () => {
-  const items = $$(".reveal");
-  if (!items.length) return;
+/* ---------- Custom Cursor ---------- */
+const initCursor = () => {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
 
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
-    items.forEach((el) => el.classList.add("is-in"));
-    return;
-  }
+  const cursor = $('#cursor');
+  if (!cursor) return;
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        entry.target.classList.add("is-in");
-        observer.unobserve(entry.target);
-      }
-    },
-    { threshold: 0.12, rootMargin: "0px 0px -5% 0px" }
-  );
+  const dot = cursor.querySelector('.cursor-dot');
+  const ring = cursor.querySelector('.cursor-ring');
 
-  items.forEach((el) => {
-    if (!el.classList.contains("is-in")) {
-      observer.observe(el);
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+  let rafId;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    if (dot) {
+      dot.style.left = mouseX + 'px';
+      dot.style.top = mouseY + 'px';
     }
+  });
+
+  // Ring lerps behind
+  const animateRing = () => {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    if (ring) {
+      ring.style.left = ringX + 'px';
+      ring.style.top = ringY + 'px';
+    }
+    rafId = requestAnimationFrame(animateRing);
+  };
+  animateRing();
+
+  // Hover states
+  const hoverEls = 'a, button, .work-card, .service-item, .tag, .btn';
+  $$(hoverEls).forEach((el) => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  });
+
+  document.addEventListener('mouseleave', () => {
+    cursor.style.opacity = '0';
+  });
+  document.addEventListener('mouseenter', () => {
+    cursor.style.opacity = '1';
   });
 };
 
+/* ---------- GSAP Scroll Reveal ---------- */
+const initScrollReveal = () => {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+    // Fallback: IntersectionObserver
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-in');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -5% 0px' }
+    );
+    $$('.reveal-up').forEach((el) => {
+      if (!el.classList.contains('is-in')) observer.observe(el);
+    });
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  $$('.reveal-up').forEach((el) => {
+    const delay = parseFloat(el.dataset.delay || 0) / 1000;
+
+    gsap.fromTo(
+      el,
+      { opacity: 0, y: 35 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 88%',
+          once: true,
+        },
+      }
+    );
+  });
+};
+
+/* ---------- Mailto Form ---------- */
 const initMailtoForm = () => {
-  const form = $("#contactForm");
+  const form = $('#contactForm');
   if (!form) return;
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const data = new FormData(form);
-    const name = String(data.get("name") || "").trim();
-    const email = String(data.get("email") || "").trim();
-    const type = String(data.get("type") || "").trim();
-    const message = String(data.get("message") || "").trim();
+    const name = String(data.get('name') || '').trim();
+    const email = String(data.get('email') || '').trim();
+    const type = String(data.get('type') || '').trim();
+    const message = String(data.get('message') || '').trim();
 
     if (!name || !email || !message) {
-      alert("Please fill in your name, email, and message.");
+      alert('Please fill in your name, email, and message.');
       return;
     }
 
@@ -94,11 +175,10 @@ const initMailtoForm = () => {
       `Name: ${name}\nEmail: ${email}\nProject type: ${type}\n\nMessage:\n${message}\n`
     );
 
-    // Google Analytics Event Tracking
-    if (typeof window.gtag === "function") {
-      window.gtag("event", "contact_form_submit", {
-        event_category: "Contact",
-        event_label: type
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'contact_form_submit', {
+        event_category: 'Contact',
+        event_label: type,
       });
     }
 
@@ -106,119 +186,133 @@ const initMailtoForm = () => {
   });
 };
 
-// Resilient Offline/Placeholder Works in Case of Setup/Network Lag
+/* ---------- Default Works ---------- */
 const DEFAULT_WORKS = [
   {
-    id: "1",
-    title: "Parashurama Theme Park",
-    description: "Karkala — a panoramic setting with a strong cultural centerpiece.",
-    category: "Public",
-    location: "Karkala",
-    image: "assets/img/work-parashurama.jpg"
+    id: '1',
+    title: 'Parashurama Theme Park',
+    description: 'Karkala — a panoramic setting with a strong cultural centerpiece.',
+    category: 'Public',
+    location: 'Karkala',
+    image: 'assets/img/work-parashurama.jpg',
   },
   {
-    id: "2",
-    title: "Bhagavathi Mane / Devi Nilaya",
-    description: "A home shaped by deep shade, layered roofs, and a calm courtyard rhythm.",
-    category: "Residence",
-    location: "India",
-    image: "assets/img/work-bhagavathi.jpg"
+    id: '2',
+    title: 'Bhagavathi Mane / Devi Nilaya',
+    description: 'A home shaped by deep shade, layered roofs, and a calm courtyard rhythm.',
+    category: 'Residence',
+    location: 'India',
+    image: 'assets/img/work-bhagavathi.jpg',
   },
   {
-    id: "3",
-    title: "Bhagavathi Mane / Devi Nilaya",
-    description: "Traditional lines with a contemporary calm—crafted for everyday shade.",
-    category: "Residence",
-    location: "India",
-    image: "assets/img/work-bhagavathi-2.jpg"
+    id: '3',
+    title: 'Bhagavathi Mane / Devi Nilaya',
+    description: 'Traditional lines with a contemporary calm — crafted for everyday shade.',
+    category: 'Residence',
+    location: 'India',
+    image: 'assets/img/work-bhagavathi-2.jpg',
   },
   {
-    id: "4",
-    title: "Kadu Mane / Kutira",
-    description: "A humble home set within lush greens—quiet, grounded, and warm.",
-    category: "Residence",
-    location: "Kapoli",
-    image: "assets/img/work-kadu.jpg"
-  }
+    id: '4',
+    title: 'Kadu Mane / Kutira',
+    description: 'A humble home set within lush greens — quiet, grounded, and warm.',
+    category: 'Residence',
+    location: 'Kapoli',
+    image: 'assets/img/work-kadu.jpg',
+  },
 ];
 
-// Helper to inject HTML cards into grid
+/* ---------- Render Works ---------- */
 const renderWorks = (works, container) => {
   if (!works || works.length === 0) {
     container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 3rem 1rem;">
-        <p>No projects uploaded yet. Visit the admin dashboard to add works.</p>
+      <div class="loading-state">
+        <p>No projects uploaded yet.</p>
       </div>`;
     return;
   }
 
   container.innerHTML = works
     .map(
-      (work) => `
-    <article class="card reveal">
-      <div class="card-media" style="background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.28)), url('${work.image}') center/cover no-repeat;" role="img" aria-label="${work.title} — ${work.description}"></div>
-      <div class="card-body">
-        <h3>${work.title}</h3>
-        <p>${work.description}</p>
-        <div class="card-meta">
+      (work, i) => `
+    <article class="work-card reveal-up" data-delay="${i * 80}" style="opacity:0">
+      <div class="work-media">
+        <img
+          class="work-img"
+          src="${work.image}"
+          alt="${work.title}"
+          loading="${i < 2 ? 'eager' : 'lazy'}"
+        />
+      </div>
+      <div class="work-body">
+        <div class="work-meta">
           <span>${work.category}</span>
           <span>•</span>
-          <span>${work.location}</span>
+          <span style="color:var(--muted)">${work.location}</span>
         </div>
+        <h3 class="work-title">${work.title}</h3>
+        <p class="work-desc">${work.description}</p>
       </div>
     </article>
   `
     )
-    .join("");
+    .join('');
 
-  // Trigger scroll reveals for dynamic elements
-  initReveal();
+  // Re-init scroll reveals for newly rendered cards
+  initScrollReveal();
+
+  // Re-init cursor hover for new cards
+  if (!window.matchMedia('(pointer: coarse)').matches) {
+    $$('.work-card').forEach((el) => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
+  }
 };
 
+/* ---------- Dynamic Works (Supabase) ---------- */
 const initDynamicWorks = async () => {
-  const container = $("#works-container");
+  const container = $('#works-container');
   if (!container) return;
 
-  // 1. Resolve Supabase config dynamically
-  const creds = window.getSupabaseCredentials ? window.getSupabaseCredentials() : { isConfigured: false };
+  const creds = window.getSupabaseCredentials
+    ? window.getSupabaseCredentials()
+    : { isConfigured: false };
 
   if (!creds.isConfigured) {
-    console.log("Supabase is not configured yet. Rendering offline defaults.");
+    console.log('Supabase not configured — rendering offline defaults.');
     renderWorks(DEFAULT_WORKS, container);
     return;
   }
 
   try {
-    // 2. Initialize Supabase Client
     const supabaseClient = supabase.createClient(creds.url, creds.anonKey);
-    
-    // 3. Fetch from Postgres works table
     const { data: works, error } = await supabaseClient
-      .from("works")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .from('works')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    // If table is newly created but empty, render default works so the site remains beautiful!
     if (!works || works.length === 0) {
-      console.log("Supabase database empty. Rendering offline defaults.");
+      console.log('Supabase DB empty — rendering offline defaults.');
       renderWorks(DEFAULT_WORKS, container);
       return;
     }
 
     renderWorks(works, container);
   } catch (err) {
-    console.error("Supabase load error. Falling back to local default works:", err);
-    // Keep user site 100% active even in case of database or connection limits
+    console.error('Supabase error — falling back to local defaults:', err);
     renderWorks(DEFAULT_WORKS, container);
   }
 };
 
-// Initializers
+/* ---------- Boot ---------- */
 setYear();
+
 initStickyHeader();
 initMobileNav();
-initReveal();
+initCursor();
+initScrollReveal();
 initDynamicWorks();
 initMailtoForm();

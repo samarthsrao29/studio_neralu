@@ -7,358 +7,331 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-44VTVQC4YN');
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Studio Neralu — architecture & interiors. Thoughtful spaces, calm details, and material honesty."
-    />
+    <meta name="description" content="Studio Neralu — architecture & interiors. Thoughtful spaces, calm details, and material honesty." />
     <title>Studio Neralu — Architecture & Interiors</title>
     <meta property="og:title" content="Studio Neralu — Architecture & Interiors" />
-    <meta
-      property="og:description"
-      content="Thoughtful spaces, calm details, and material honesty."
-    />
+    <meta property="og:description" content="Thoughtful spaces, calm details, and material honesty." />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#0b0c0f" />
+    <meta name="theme-color" content="#0b0b0b" />
 
     <link rel="icon" href="assets/img/favicon.png" type="image/png" />
-    <!-- Uses system fonts (SF Pro on Apple devices) -->
+
+    <!-- Cuberto-style fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+
+    <!-- GSAP + ScrollTrigger + Lenis -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="site-header" data-elevate>
-      <div class="container header-inner">
+    <!-- Custom cursor -->
+    <div class="cursor" id="cursor" aria-hidden="true">
+      <div class="cursor-dot"></div>
+      <div class="cursor-ring"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="site-header" id="site-header">
+      <div class="header-inner">
         <a class="brand" href="#" aria-label="Studio Neralu home">
           <img class="brand-logo" src="assets/img/logo.jpg" alt="Studio Neralu logo" />
-          <span class="brand-text">
-            <span class="brand-name">Studio Neralu</span>
-            <span class="brand-tag">Architecture • Interiors</span>
-          </span>
+          <span class="brand-name">Studio Neralu</span>
         </a>
 
         <nav class="nav" aria-label="Primary">
-          <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
-            <span class="nav-toggle-lines" aria-hidden="true"></span>
+          <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" id="nav-toggle">
+            <span class="hamburger" aria-hidden="true">
+              <span></span>
+              <span></span>
+            </span>
             <span class="sr-only">Menu</span>
           </button>
           <div id="nav-links" class="nav-links">
-            <a href="#work">Work</a>
-            <a href="#services">Services</a>
-            <a href="#process">Process</a>
-            <a href="#studio">Studio</a>
-            <a href="#contact" class="pill">Contact</a>
+            <a href="#work" class="nav-link">Work</a>
+            <a href="#services" class="nav-link">Services</a>
+            <a href="#process" class="nav-link">Process</a>
+            <a href="#studio" class="nav-link">Studio</a>
+            <a href="#contact" class="nav-cta">Contact</a>
           </div>
         </nav>
       </div>
     </header>
 
     <main id="main">
-      <section class="hero hero--video">
+
+      <!-- Hero -->
+      <section class="hero">
         <video class="hero-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
           <source src="assets/video/home.mp4" type="video/mp4" />
         </video>
-        <div class="hero-scrim" aria-hidden="true"></div>
+        <div class="hero-overlay" aria-hidden="true"></div>
 
-        <div class="container hero-overlay">
-          <div class="hero-copy">
-            <h1 class="hero-title reveal">WHO WE ARE.</h1>
-            <p class="hero-subtitle reveal">
-              At Studio Neralu, we believe in designing spaces that embody the spirit of ‘Neralu’, which in the native tongue literally means shadow. But within the framework of architecture it can mean so much more. From time immemorial man has always sought shade within the natural world. Shade as a means of shelter from all that the sun, the wind and the rain could manifest i.e., the natural world as we know it. Nature could be both a virtue and a vice at the same time. Thus designing spaces embodying the spirit of ‘Neralu’ both as a place of refuge and well-being is what we do at Studio Neralu.
+        <div class="hero-content">
+          <div class="hero-label">Architecture & Interiors</div>
+          <h1 class="hero-title">
+            <span class="hero-line" data-text="WHO">WHO</span>
+            <span class="hero-line" data-text="WE ARE.">WE ARE.</span>
+          </h1>
+          <div class="hero-body">
+            <p class="hero-desc">
+              At Studio Neralu, we design spaces that embody the spirit of shadow —
+              refuge, calm, and material honesty at the core of every project.
             </p>
-            <div class="hero-cta reveal">
-              <a class="button" href="#work">Explore work</a>
-              <a class="button button-ghost" href="#contact">Start a project</a>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#work">Explore work</a>
+              <a class="btn btn-outline" href="#contact">Start a project</a>
             </div>
           </div>
         </div>
 
-        <div class="hero-strip" aria-hidden="true">
-          <div class="container strip-inner">
-            <span>Concept</span>
-            <span class="dot"></span>
-            <span>Design</span>
-            <span class="dot"></span>
-            <span>Detail</span>
-            <span class="dot"></span>
-            <span>Build</span>
-            <span class="dot"></span>
-            <span>Styling</span>
+        <div class="hero-ticker" aria-hidden="true">
+          <div class="ticker-track">
+            <span>Concept</span><span class="sep">—</span>
+            <span>Design</span><span class="sep">—</span>
+            <span>Detail</span><span class="sep">—</span>
+            <span>Build</span><span class="sep">—</span>
+            <span>Styling</span><span class="sep">—</span>
+            <span>Concept</span><span class="sep">—</span>
+            <span>Design</span><span class="sep">—</span>
+            <span>Detail</span><span class="sep">—</span>
+            <span>Build</span><span class="sep">—</span>
+            <span>Styling</span><span class="sep">—</span>
           </div>
         </div>
       </section>
 
+      <!-- Work -->
       <section id="work" class="section">
-        <div class="container">
-          <header class="section-head reveal">
-            <h2>Selected work</h2>
-            <p>
-              A few recent projects—composed volumes, soft shadows, and tactile palettes. Replace
-              these placeholders with your project photos.
-            </p>
-          </header>
-
-          <div id="works-container" class="cards">
-            <!-- Dynamic portfolio works are rendered here via assets/js/main.js -->
-            <div class="loading-spinner" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-              <span class="spinner-circle" style="width: 28px; height: 28px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></span>
-              <span>Loading Selected Projects...</span>
-            </div>
-            <style>
-              @keyframes spin {
-                to { transform: rotate(360deg); }
-              }
-            </style>
+        <div class="section-container">
+          <div class="section-header reveal-up">
+            <span class="section-label">Selected work</span>
+            <h2 class="section-title">Projects we're<br><em>proud of.</em></h2>
           </div>
 
-          <div class="callout reveal">
-            <div class="callout-inner">
-              <h3>Want this to match your current brand?</h3>
-              <p>
-                Share your logo, fonts, and 6–10 project photos. I’ll swap the palette and imagery
-                to fit Studio Neralu exactly.
-              </p>
+          <div id="works-container" class="works-grid">
+            <!-- Dynamic works rendered here -->
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <span>Loading projects…</span>
             </div>
-            <a class="button button-ghost" href="#contact">Send details</a>
           </div>
         </div>
       </section>
 
-      <section id="services" class="section section-alt">
-        <div class="container">
-          <header class="section-head reveal">
-            <h2>Services</h2>
-            <p>From early concepts to on-site coordination—clear drawings, precise details.</p>
-          </header>
+      <!-- Services -->
+      <section id="services" class="section section-dark">
+        <div class="section-container">
+          <div class="section-header reveal-up">
+            <span class="section-label">What we do</span>
+            <h2 class="section-title">Full-scope<br><em>design services.</em></h2>
+          </div>
 
-          <div class="service-grid">
-            <article class="service reveal">
-              <h3>Architecture</h3>
-              <p>Site study, massing, plans, elevations, and construction documentation.</p>
-              <ul>
-                <li>Concept & schematic design</li>
-                <li>Working drawings</li>
-                <li>Site coordination</li>
-              </ul>
+          <div class="services-list">
+            <article class="service-item reveal-up" data-delay="0">
+              <div class="service-num">01</div>
+              <div class="service-body">
+                <h3>Architecture</h3>
+                <p>Site study, massing, plans, elevations, and complete construction documentation.</p>
+                <ul>
+                  <li>Concept & schematic design</li>
+                  <li>Working drawings</li>
+                  <li>Site coordination</li>
+                </ul>
+              </div>
+              <div class="service-arrow">↗</div>
             </article>
-            <article class="service reveal">
-              <h3>Interiors</h3>
-              <p>Layouts, material palettes, lighting, and furniture coordination.</p>
-              <ul>
-                <li>Space planning</li>
-                <li>Material & lighting design</li>
-                <li>Custom joinery details</li>
-              </ul>
+
+            <article class="service-item reveal-up" data-delay="100">
+              <div class="service-num">02</div>
+              <div class="service-body">
+                <h3>Interiors</h3>
+                <p>Layouts, material palettes, lighting, and furniture coordination.</p>
+                <ul>
+                  <li>Space planning</li>
+                  <li>Material & lighting design</li>
+                  <li>Custom joinery details</li>
+                </ul>
+              </div>
+              <div class="service-arrow">↗</div>
             </article>
-            <article class="service reveal">
-              <h3>Styling</h3>
-              <p>Finishing layers to make spaces feel lived-in, calm, and coherent.</p>
-              <ul>
-                <li>Soft furnishing direction</li>
-                <li>Art & object curation</li>
-                <li>Photoshoot prep</li>
-              </ul>
+
+            <article class="service-item reveal-up" data-delay="200">
+              <div class="service-num">03</div>
+              <div class="service-body">
+                <h3>Styling</h3>
+                <p>Finishing layers to make spaces feel lived-in, calm, and coherent.</p>
+                <ul>
+                  <li>Soft furnishing direction</li>
+                  <li>Art & object curation</li>
+                  <li>Photoshoot prep</li>
+                </ul>
+              </div>
+              <div class="service-arrow">↗</div>
             </article>
           </div>
         </div>
       </section>
 
+      <!-- Process -->
       <section id="process" class="section">
-        <div class="container">
-          <header class="section-head reveal">
-            <h2>Process</h2>
-            <p>Transparent phases with clear deliverables—so decisions feel easy.</p>
-          </header>
-
-          <ol class="timeline">
-            <li class="timeline-item reveal">
-              <div class="timeline-step">01</div>
-              <div class="timeline-body">
-                <h3>Discover</h3>
-                <p>Brief, site walkthrough, references, budget, and priorities.</p>
-              </div>
-            </li>
-            <li class="timeline-item reveal">
-              <div class="timeline-step">02</div>
-              <div class="timeline-body">
-                <h3>Concept</h3>
-                <p>Massing, zoning, key views, light strategy, and initial palettes.</p>
-              </div>
-            </li>
-            <li class="timeline-item reveal">
-              <div class="timeline-step">03</div>
-              <div class="timeline-body">
-                <h3>Design</h3>
-                <p>Plans, elevations, 3D, materials, lighting layers, and details.</p>
-              </div>
-            </li>
-            <li class="timeline-item reveal">
-              <div class="timeline-step">04</div>
-              <div class="timeline-body">
-                <h3>Build</h3>
-                <p>Working drawings, coordination, site visits, and on-ground decisions.</p>
-              </div>
-            </li>
-          </ol>
-        </div>
-      </section>
-
-      <section id="studio" class="section section-alt">
-        <div class="container studio-grid">
-          <div class="studio-copy">
-            <header class="section-head reveal">
-              <h2>Studio</h2>
-              <p>
-                Studio Neralu crafts contemporary spaces with a warm, minimal sensibility—focused on
-                proportion, texture, and daylight. Keep this copy, or replace it with your real
-                story.
-              </p>
-            </header>
-
-            <div class="badges reveal" aria-label="Studio qualities">
-              <span class="badge">Context-led</span>
-              <span class="badge">Detail-first</span>
-              <span class="badge">Budget-aware</span>
-              <span class="badge">On-site</span>
-            </div>
-
-            <div class="quote reveal">
-              <p>
-                “The best spaces feel inevitable—quiet, balanced, and beautifully ordinary.”
-              </p>
-              <span class="quote-by">— Studio note</span>
-            </div>
+        <div class="section-container">
+          <div class="section-header reveal-up">
+            <span class="section-label">How we work</span>
+            <h2 class="section-title">A clear path<br><em>from concept to build.</em></h2>
           </div>
 
-          <aside class="studio-panel reveal" aria-label="Quick info">
-            <div class="panel-card">
-              <h3>Typical timelines</h3>
-              <p class="muted">Varies by scale; these are common ranges.</p>
-              <dl class="panel-list">
-                <div>
-                  <dt>Interiors</dt>
-                  <dd>6–12 weeks</dd>
-                </div>
-                <div>
-                  <dt>Homes</dt>
-                  <dd>10–20 weeks</dd>
-                </div>
-                <div>
-                  <dt>Build support</dt>
-                  <dd>As needed</dd>
-                </div>
-              </dl>
+          <div class="process-grid">
+            <div class="process-item reveal-up" data-delay="0">
+              <div class="process-step">01</div>
+              <h3>Discover</h3>
+              <p>Brief, site walkthrough, references, budget, and priorities.</p>
             </div>
-
-            <div class="panel-card">
-              <h3>Deliverables</h3>
-              <ul class="ticks">
-                <li>Layouts & working drawings</li>
-                <li>Material & lighting schedule</li>
-                <li>Joinery details</li>
-                <li>Site coordination notes</li>
-              </ul>
+            <div class="process-item reveal-up" data-delay="100">
+              <div class="process-step">02</div>
+              <h3>Concept</h3>
+              <p>Massing, zoning, key views, light strategy, and initial palettes.</p>
             </div>
-          </aside>
+            <div class="process-item reveal-up" data-delay="200">
+              <div class="process-step">03</div>
+              <h3>Design</h3>
+              <p>Plans, elevations, 3D, materials, lighting layers, and details.</p>
+            </div>
+            <div class="process-item reveal-up" data-delay="300">
+              <div class="process-step">04</div>
+              <h3>Build</h3>
+              <p>Working drawings, coordination, site visits, and on-ground decisions.</p>
+            </div>
+          </div>
         </div>
       </section>
 
+      <!-- Studio -->
+      <section id="studio" class="section section-dark">
+        <div class="section-container">
+          <div class="studio-layout">
+            <div class="studio-left reveal-up">
+              <span class="section-label">About us</span>
+              <h2 class="section-title">A practice built on<br><em>shadow & light.</em></h2>
+              <p class="studio-desc">
+                Studio Neralu crafts contemporary spaces with a warm, minimal sensibility —
+                focused on proportion, texture, and daylight. The word <em>Neralu</em>
+                means shadow in the native tongue; shade as shelter, calm as intention.
+              </p>
+              <div class="studio-tags">
+                <span class="tag">Context-led</span>
+                <span class="tag">Detail-first</span>
+                <span class="tag">Budget-aware</span>
+                <span class="tag">On-site</span>
+              </div>
+              <blockquote class="studio-quote">
+                "The best spaces feel inevitable — quiet, balanced, and beautifully ordinary."
+                <cite>— Studio note</cite>
+              </blockquote>
+            </div>
+
+            <div class="studio-right reveal-up">
+              <div class="info-card">
+                <h4>Typical timelines</h4>
+                <p class="info-sub">Varies by scale; common ranges.</p>
+                <dl class="info-list">
+                  <div><dt>Interiors</dt><dd>6–12 weeks</dd></div>
+                  <div><dt>Homes</dt><dd>10–20 weeks</dd></div>
+                  <div><dt>Build support</dt><dd>As needed</dd></div>
+                </dl>
+              </div>
+              <div class="info-card">
+                <h4>Deliverables</h4>
+                <ul class="info-ticks">
+                  <li>Layouts & working drawings</li>
+                  <li>Material & lighting schedule</li>
+                  <li>Joinery details</li>
+                  <li>Site coordination notes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact -->
       <section id="contact" class="section">
-        <div class="container contact-grid">
-          <header class="section-head reveal">
-            <h2>Contact</h2>
-            <p>
-              Tell us a little about your site, scope, and timeline. This form opens your email
-              app—no backend required.
-            </p>
-          </header>
-
-          <div class="contact-card reveal">
-            <form id="contactForm" class="form" novalidate>
-              <label>
-                <span>Name</span>
-                <input name="name" autocomplete="name" placeholder="Your name" required />
-              </label>
-              <label>
-                <span>Email</span>
-                <input name="email" type="email" autocomplete="email" placeholder="you@email.com" required />
-              </label>
-              <label>
-                <span>Project type</span>
-                <select name="type">
-                  <option value="Residence">Residence</option>
-                  <option value="Interiors">Interiors</option>
-                  <option value="Commercial">Commercial</option>
-                  <option value="Other">Other</option>
-                </select>
-              </label>
-              <label class="full">
-                <span>Message</span>
-                <textarea
-                  name="message"
-                  rows="5"
-                  placeholder="Location, approximate area, budget range, and timeline…"
-                  required
-                ></textarea>
-              </label>
-
-              <div class="form-actions full">
-                <button class="button" type="submit">Compose email</button>
-                <p class="muted small">
-                  Or email directly:
-                  <a href="mailto:ar.sampreethrao@studioneralu.com">ar.sampreethrao@studioneralu.com</a>
-                </p>
+        <div class="section-container">
+          <div class="contact-layout">
+            <div class="contact-left reveal-up">
+              <span class="section-label">Get in touch</span>
+              <h2 class="section-title">Start your<br><em>project today.</em></h2>
+              <p class="contact-desc">
+                Tell us about your site, scope, and timeline. We'll get back to you within 48 hours.
+              </p>
+              <div class="contact-links">
+                <a href="https://www.instagram.com/studio_neralu/" target="_blank" rel="noopener noreferrer" class="contact-link">
+                  <span>Instagram</span><span class="link-arrow">↗</span>
+                </a>
+                <a href="https://www.linkedin.com/company/studio-neralu/" target="_blank" rel="noopener noreferrer" class="contact-link">
+                  <span>LinkedIn</span><span class="link-arrow">↗</span>
+                </a>
+                <a href="mailto:ar.sampreethrao@studioneralu.com" class="contact-link">
+                  <span>ar.sampreethrao@studioneralu.com</span><span class="link-arrow">↗</span>
+                </a>
               </div>
-            </form>
-          </div>
+            </div>
 
-          <div class="contact-side reveal">
-            <div class="mini-card">
-              <h3>Architectural designer</h3>
-              <p>
-                A young design practice estb'19 by @ar.sampreeth_rao exploring architecture as a
-                critical response to the culture, climate & context.
-              </p>
-              <p class="muted">576112</p>
-            </div>
-            <div class="mini-card">
-              <h3>Instagram</h3>
-              <p>
-                <a href="https://www.instagram.com/studio_neralu/" target="_blank" rel="noopener noreferrer"
-                  >@studio_neralu</a
-                >
-              </p>
-            </div>
-            <div class="mini-card">
-              <h3>LinkedIn</h3>
-              <p>
-                <a
-                  href="https://www.linkedin.com/company/studio-neralu/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Studio Neralu on LinkedIn"
-                  >Studio Neralu</a
-                >
-              </p>
+            <div class="contact-right reveal-up">
+              <form id="contactForm" class="contact-form" novalidate>
+                <div class="form-row">
+                  <label class="form-field">
+                    <span>Name</span>
+                    <input name="name" autocomplete="name" placeholder="Your name" required />
+                  </label>
+                  <label class="form-field">
+                    <span>Email</span>
+                    <input name="email" type="email" autocomplete="email" placeholder="you@email.com" required />
+                  </label>
+                </div>
+                <label class="form-field">
+                  <span>Project type</span>
+                  <select name="type">
+                    <option value="Residence">Residence</option>
+                    <option value="Interiors">Interiors</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+                <label class="form-field">
+                  <span>Message</span>
+                  <textarea name="message" rows="5" placeholder="Location, approximate area, budget range, and timeline…" required></textarea>
+                </label>
+                <button class="btn btn-primary btn-full" type="submit">Send message</button>
+              </form>
             </div>
           </div>
         </div>
       </section>
     </main>
 
+    <!-- Footer -->
     <footer class="footer">
-      <div class="container footer-inner">
-        <p class="footer-brand">Studio Neralu</p>
-        <p class="muted">© <span id="year"></span> • Architecture & Interiors</p>
-        <div class="footer-links">
-          <a href="#work">Work</a>
-          <a href="#services">Services</a>
-          <a href="#contact">Contact</a>
+      <div class="footer-inner">
+        <div class="footer-left">
+          <p class="footer-brand">Studio Neralu</p>
+          <p class="footer-sub">Architecture • Interiors • Styling</p>
+        </div>
+        <div class="footer-right">
+          <p class="footer-copy">© <span id="year"></span> Studio Neralu</p>
+          <nav class="footer-nav" aria-label="Footer">
+            <a href="#work">Work</a>
+            <a href="#services">Services</a>
+            <a href="#contact">Contact</a>
+          </nav>
         </div>
       </div>
     </footer>
