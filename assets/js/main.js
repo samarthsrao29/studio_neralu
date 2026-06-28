@@ -285,6 +285,22 @@ const sortWorksNewestFirst = (works) => {
   });
 };
 
+const mergeDefaultAndPublishedWorks = (publishedWorks) => {
+  const merged = [...DEFAULT_WORKS];
+  const seen = new Set(
+    merged.map((work) => `${work.title}|${work.location}|${work.category}|${work.image}`)
+  );
+
+  sortWorksNewestFirst(publishedWorks).forEach((work) => {
+    const key = `${work.title}|${work.location}|${work.category}|${work.image}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    merged.unshift(work);
+  });
+
+  return merged;
+};
+
 const loadWorksFromLocalApi = async () => {
   const response = await fetch('/api/works');
   if (!response.ok) return null;
@@ -300,13 +316,7 @@ const initDynamicWorks = async () => {
   try {
     const localWorks = await loadWorksFromLocalApi();
     if (localWorks) {
-      if (localWorks.length === 0) {
-        console.log('Local works DB empty — rendering offline defaults.');
-        renderWorks(DEFAULT_WORKS, container);
-        return;
-      }
-
-      renderWorks(localWorks, container);
+      renderWorks(mergeDefaultAndPublishedWorks(localWorks), container);
       return;
     }
   } catch (err) {
@@ -329,15 +339,7 @@ const initDynamicWorks = async () => {
 
     if (error) throw error;
 
-    const sortedWorks = sortWorksNewestFirst(works);
-
-    if (sortedWorks.length === 0) {
-      console.log('Supabase DB empty — rendering offline defaults.');
-      renderWorks(DEFAULT_WORKS, container);
-      return;
-    }
-
-    renderWorks(sortedWorks, container);
+    renderWorks(mergeDefaultAndPublishedWorks(works), container);
   } catch (err) {
     console.error('Supabase error — falling back to local defaults:', err);
     renderWorks(DEFAULT_WORKS, container);
