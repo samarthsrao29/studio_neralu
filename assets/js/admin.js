@@ -108,6 +108,11 @@ const getSupabaseClient = () => {
   return supabaseClient;
 };
 
+const saveSupabaseCredentials = (url, anonKey) => {
+  localStorage.setItem('neralu_supabase_url', url.trim());
+  localStorage.setItem('neralu_supabase_key', anonKey.trim());
+};
+
 const uploadImageToSupabase = async (file) => {
   const client = getSupabaseClient();
   if (!client) throw new Error('Supabase is not configured.');
@@ -332,6 +337,28 @@ const setupFormSubmit = () => {
   });
 };
 
+const setupSupabaseConfigForm = () => {
+  const form = $('#setupForm');
+  const urlInput = $('#setupUrlInput');
+  const keyInput = $('#setupKeyInput');
+  if (!form || !urlInput || !keyInput) return;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const url = urlInput.value.trim();
+    const anonKey = keyInput.value.trim();
+
+    if (!url || !anonKey) {
+      showToast('Please enter both Supabase credentials.', 'error');
+      return;
+    }
+
+    saveSupabaseCredentials(url, anonKey);
+    window.location.reload();
+  });
+};
+
 /* ---------- Delete ---------- */
 window.deleteWork = async (id) => {
   if (!confirm('Permanently delete this project?')) return;
@@ -372,16 +399,25 @@ window.deleteWork = async (id) => {
 
 /* ---------- Boot ---------- */
 document.addEventListener('DOMContentLoaded', () => {
-  // Always show the main dashboard — no Supabase setup needed
   const setupView = $('#supabaseSetupView');
   const mainView = $('#mainDashboardView');
   const settingsBtn = $('#openSettingsBtn');
+  const creds = window.getSupabaseCredentials ? window.getSupabaseCredentials() : { isConfigured: false };
 
-  if (setupView) setupView.style.display = 'none';
-  if (mainView) mainView.style.display = 'block';
-  if (settingsBtn) settingsBtn.style.display = canUseSupabase() && !canUseLocalApi() ? 'flex' : 'none';
+  if (creds.isConfigured || canUseLocalApi()) {
+    if (setupView) setupView.style.display = 'none';
+    if (mainView) mainView.style.display = 'block';
+    if (settingsBtn) settingsBtn.style.display = canUseSupabase() && !canUseLocalApi() ? 'flex' : 'none';
+  } else {
+    if (setupView) setupView.style.display = 'block';
+    if (mainView) mainView.style.display = 'none';
+    if (settingsBtn) settingsBtn.style.display = 'none';
+  }
 
   setupImagePreview();
   setupFormSubmit();
-  loadWorks();
+  setupSupabaseConfigForm();
+  if (creds.isConfigured || canUseLocalApi()) {
+    loadWorks();
+  }
 });
