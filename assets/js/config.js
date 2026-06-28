@@ -3,9 +3,9 @@
 // paste them directly into the Setup UI on the Admin Panel page!
 
 const SUPABASE_CONFIG = {
-  // Option A: Hardcode your credentials here (Optional)
-  url: "https://dhifmsyphcindfammvht.supabase.co",       // e.g. "https://your-project-id.supabase.co"
-  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoaWZtc3lwaGNpbmRmYW1tdmh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMDI0OTksImV4cCI6MjA5NDU3ODQ5OX0.BGO0g5HOwUgIdo6RKboJ7qHfkqg25qQm9wq13wsUuFI",   // e.g. "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  // Leave these blank unless you want to hardcode credentials locally.
+  url: "",
+  anonKey: "",
 };
 
 // Helper to resolve Supabase credentials dynamically
