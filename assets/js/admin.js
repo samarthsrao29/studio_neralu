@@ -128,7 +128,10 @@ const updateSettingsPanel = (creds) => {
 
   if (disconnectBtn) {
     disconnectBtn.addEventListener('click', () => {
-      if (!confirm('Disconnect from the Supabase database?')) return;
+      const confirmed = confirm(
+        'Disconnect from Supabase? This will clear the saved Project URL and anon key from this browser.'
+      );
+      if (!confirmed) return;
       clearSupabaseCredentials();
       window.location.reload();
     });
