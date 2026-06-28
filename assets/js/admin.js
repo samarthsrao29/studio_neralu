@@ -113,6 +113,28 @@ const saveSupabaseCredentials = (url, anonKey) => {
   localStorage.setItem('neralu_supabase_key', anonKey.trim());
 };
 
+const clearSupabaseCredentials = () => {
+  localStorage.removeItem('neralu_supabase_url');
+  localStorage.removeItem('neralu_supabase_key');
+};
+
+const updateSettingsPanel = (creds) => {
+  const settingsDbUrl = $('#settingsDbUrl');
+  const disconnectBtn = $('#disconnectDbBtn');
+
+  if (settingsDbUrl) {
+    settingsDbUrl.textContent = creds?.isConfigured && creds.url ? creds.url : 'Not configured';
+  }
+
+  if (disconnectBtn) {
+    disconnectBtn.addEventListener('click', () => {
+      if (!confirm('Disconnect from the Supabase database?')) return;
+      clearSupabaseCredentials();
+      window.location.reload();
+    });
+  }
+};
+
 const uploadImageToSupabase = async (file) => {
   const client = getSupabaseClient();
   if (!client) throw new Error('Supabase is not configured.');
@@ -417,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupImagePreview();
   setupFormSubmit();
   setupSupabaseConfigForm();
+  updateSettingsPanel(creds);
   if (creds.isConfigured || canUseLocalApi()) {
     loadWorks();
   }
